@@ -1,0 +1,10 @@
+src/DeepLinkModule/.classpath
+src/DeepLinkModule/.project
+src/DeepLinkModule/DeepLinkModule.launch
+src/DeepLinkModule/deployment/
+src/DeepLinkModule/javasource/administration/
+src/DeepLinkModule/javasource/com/mendix/core/Core.java
+src/DeepLinkModule/javasource/deeplink/proxies/
+src/DeepLinkModule/javasource/system/
+src/DeepLinkModule/javasource/test/proxies/
+src/DeepLinkModule/[App Store] Deeplink.mpr.lock
