@@ -1,0 +1,22 @@
+<html>
+	<head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Mendix 5 - Login</title>
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="robots" content="noindex, nofollow">
+        <link rel="stylesheet" href="{RELPATH}lib/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{RELPATH}css/login.css">
+	</head>
+	<body>
+        <div class="login-container" style="max-width:600px">
+                <div class="login-logo"></div>
+                <div class="contentPane">
+							<h1>Not found: {URL}</h1><br/>
+							The requested object does not exist or you {USER} do not have the permissions to view the object. <br/><br/>
+							You can try to navigate directly to the <a href ="{RELPATH}index.html">application</a>.
+                 </div>
+        </div>				
+	</body>
+</html>
