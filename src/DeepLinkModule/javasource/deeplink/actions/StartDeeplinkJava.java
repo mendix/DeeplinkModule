@@ -329,6 +329,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 				url = url.substring(1);
 			}
 			if (qs != null && !qs.equals("")) {
+			    qs = URLDecoder.decode(qs, "UTF-8");
 			    url = url + "?" + URLEncoder.encode(qs, "UTF-8");
 			}
 				
