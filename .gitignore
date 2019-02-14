@@ -8,3 +8,4 @@ src/DeepLinkModule/javasource/deeplink/proxies/
 src/DeepLinkModule/javasource/system/
 src/DeepLinkModule/javasource/test/proxies/
 src/DeepLinkModule/[App Store] Deeplink.mpr.lock
+*.lock
