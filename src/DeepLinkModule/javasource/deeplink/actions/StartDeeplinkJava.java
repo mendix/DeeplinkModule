@@ -28,9 +28,12 @@ import com.mendix.m2ee.api.IMxRuntimeResponse;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 import com.mendix.systemwideinterfaces.core.ISession;
+import com.mendix.systemwideinterfaces.core.IUser;
 import com.mendix.webui.CustomJavaAction;
 import deeplink.proxies.DeepLink;
 import deeplink.proxies.PendingLink;
+import system.proxies.Language;
+import system.proxies.User;
 
 /**
  * Starts the deeplink modle. Initializes the "/link/" request handler.
@@ -197,7 +200,17 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 			
 			//switch to the users context
 			context = session.createContext(); 
-			String user = session.getUser().getName();
+			IUser sessionUserObj = session.getUser();
+			String userName = sessionUserObj.getName();
+			
+			// Retrieve the language set for the deeplink.
+			Language language = deeplink.getDeepLink_Language();
+			if (language != null) {
+				// Deeplink has a language, put it on the session user.
+				User user = User.initialize(context, sessionUserObj.getMendixObject());
+				user.setUser_Language(language);
+				user.commit();
+			}
 
 			//we have a valid session, further security is enforced by the application
 			
@@ -205,7 +218,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 			List<IMendixObject> pendinglinks = Core.retrieveXPathQueryEscaped(context, "//%s[%s='%s' and %s='%s']",
 					PendingLink.getType(), 
 					PendingLink.MemberNames.PendingLink_DeepLink.toString(), String.valueOf(deeplink.getMendixObject().getId().toLong()),
-					PendingLink.MemberNames.User.toString(), user 
+					PendingLink.MemberNames.User.toString(), userName 
 			);
 			
 			Core.delete(context, pendinglinks);
@@ -225,7 +238,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 				if (arg == null) 
 				{
 					StartDeeplinkJava.logger.warn(String.format("While serving deeplink '%s', the object %s.%s for value '%s' was not found", deeplink.getName(), deeplink.getObjectType(), deeplink.getObjectAttribute(), argument));
-					serve404(request, response, user);
+					serve404(request, response, userName);
 					return;
 				}
 				
