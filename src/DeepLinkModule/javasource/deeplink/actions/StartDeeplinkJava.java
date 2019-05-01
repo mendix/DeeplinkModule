@@ -138,7 +138,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 				*	a new login page for the user instead of being logged in.
 				*/
 				if (request.getParameter(ARGUSER)!= null && request.getParameter(ARGPASS) != null) {
-                	if ( session == null || (session!=null && session.getUser().isAnonymous()) ) {
+                	if ( session == null || (session!=null && session.getUser(context()).isAnonymous()) ) {
                     	if ( session == null ) 
                     		StartDeeplinkJava.logger.debug("No session found for deeplink: " + request.getResourcePath() + ", attempting login.");
                     	else	
@@ -171,7 +171,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 			
 			if (deeplinkObj == null) {
 				StartDeeplinkJava.logger.warn("Deeplink with name '" + args[2] + "' not found. ");
-				serve404(request, response, session == null ? null : session.getUser().getName());
+				serve404(request, response, session == null ? null : session.getUser(context()).getName());
 				return;
 			}
 			
@@ -187,7 +187,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 					return;
 				}
 			}
-			else if (!deeplink.getAllowGuests().booleanValue() && session.getUser().isAnonymous()) //guest session, which is not allowed
+			else if (!deeplink.getAllowGuests().booleanValue() && session.getUser(context()).isAnonymous()) //guest session, which is not allowed
 			{
 				serveLogin(request, response, DEFAULTLOGINTEXT);
 				return;
@@ -200,7 +200,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 			
 			//switch to the users context
 			context = session.createContext(); 
-			IUser sessionUserObj = session.getUser();
+			IUser sessionUserObj = session.getUser(context());
 			String userName = sessionUserObj.getName();
 			
 			// Retrieve the language set for the deeplink.
@@ -248,7 +248,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 			//then create a new pendinglink
 			PendingLink link = PendingLink.initialize(context, Core.instantiate(context, PendingLink.entityName));
 			link.setPendingLink_DeepLink(deeplink);
-			link.setUser(session.getUser().getName());
+			link.setUser(session.getUser(context()).getName());
 			link.setArgument(theobject);
 			link.setSessionId(session.getId().toString());
 			
