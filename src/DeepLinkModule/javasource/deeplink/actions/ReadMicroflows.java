@@ -31,15 +31,15 @@ import deeplink.proxies.Microflow;
  * 
  * Returns true (always)
  */
-public class ReadMicroflows extends CustomJavaAction<Boolean>
+public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 {
 	public ReadMicroflows(IContext context)
 	{
 		super(context);
 	}
 
-	@Override
-	public Boolean executeAction() throws Exception
+	@java.lang.Override
+	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
 		removeAll(Entity.getType());
@@ -132,8 +132,8 @@ public class ReadMicroflows extends CustomJavaAction<Boolean>
 	/**
 	 * Returns a string representation of this action
 	 */
-	@Override
-	public String toString()
+	@java.lang.Override
+	public java.lang.String toString()
 	{
 		return "ReadMicroflows";
 	}
