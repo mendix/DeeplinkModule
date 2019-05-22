@@ -177,11 +177,11 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 			
 			DeepLink deeplink = DeepLink.initialize(systemContext, deeplinkObj);
 			
-			if (session == null) 
-			{
-				if (deeplink.getAllowGuests().booleanValue())
+			if (session == null) {
+				if (deeplink.getAllowGuests().booleanValue()) {
 					session = createGuestSession(response);
-				else //session is required
+					sessionContext = session.createContext();
+				} else // session is required
 				{
 					serveLogin(request, response, DEFAULTLOGINTEXT);
 					return;
