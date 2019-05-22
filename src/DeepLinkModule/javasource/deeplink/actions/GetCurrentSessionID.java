@@ -15,15 +15,15 @@ import com.mendix.webui.CustomJavaAction;
 /**
  * Returns the Session ID of the current Session.
  */
-public class GetCurrentSessionID extends CustomJavaAction<String>
+public class GetCurrentSessionID extends CustomJavaAction<java.lang.String>
 {
 	public GetCurrentSessionID(IContext context)
 	{
 		super(context);
 	}
 
-	@Override
-	public String executeAction() throws Exception
+	@java.lang.Override
+	public java.lang.String executeAction() throws Exception
 	{
 		// BEGIN USER CODE
 		return getContext().getSession().getId().toString();
@@ -33,8 +33,8 @@ public class GetCurrentSessionID extends CustomJavaAction<String>
 	/**
 	 * Returns a string representation of this action
 	 */
-	@Override
-	public String toString()
+	@java.lang.Override
+	public java.lang.String toString()
 	{
 		return "GetCurrentSessionID";
 	}

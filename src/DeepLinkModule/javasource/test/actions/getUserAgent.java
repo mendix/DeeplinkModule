@@ -9,23 +9,22 @@
 
 package test.actions;
 
-import com.mendix.systemwideinterfaces.core.ISession;
-import com.mendix.systemwideinterfaces.core.UserAction;
 import com.mendix.systemwideinterfaces.core.IContext;
+import com.mendix.systemwideinterfaces.core.ISession;
 import com.mendix.webui.CustomJavaAction;
 
 /**
  * Retrieves user agent for the current agent.
  */
-public class getUserAgent extends CustomJavaAction<String>
+public class getUserAgent extends CustomJavaAction<java.lang.String>
 {
 	public getUserAgent(IContext context)
 	{
 		super(context);
 	}
 
-	@Override
-	public String executeAction() throws Exception
+	@java.lang.Override
+	public java.lang.String executeAction() throws Exception
 	{
 		// BEGIN USER CODE
 		ISession currentSession = getContext().getSession();
@@ -36,8 +35,8 @@ public class getUserAgent extends CustomJavaAction<String>
 	/**
 	 * Returns a string representation of this action
 	 */
-	@Override
-	public String toString()
+	@java.lang.Override
+	public java.lang.String toString()
 	{
 		return "getUserAgent";
 	}

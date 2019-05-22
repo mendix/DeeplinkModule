@@ -28,7 +28,7 @@ import deeplink.proxies.DeepLink;
  * Returns true if a link was executed, false otherwise.
  * If this action returns true, no further actions should be taken in the current context.
  */
-public class ExecuteDeeplink extends CustomJavaAction<Boolean>
+public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 {
 	private IMendixObject __pendinglink;
 	private deeplink.proxies.PendingLink pendinglink;
@@ -39,8 +39,8 @@ public class ExecuteDeeplink extends CustomJavaAction<Boolean>
 		this.__pendinglink = pendinglink;
 	}
 
-	@Override
-	public Boolean executeAction() throws Exception
+	@java.lang.Override
+	public java.lang.Boolean executeAction() throws Exception
 	{
 		this.pendinglink = __pendinglink == null ? null : deeplink.proxies.PendingLink.initialize(getContext(), __pendinglink);
 
@@ -136,8 +136,8 @@ public class ExecuteDeeplink extends CustomJavaAction<Boolean>
 	/**
 	 * Returns a string representation of this action
 	 */
-	@Override
-	public String toString()
+	@java.lang.Override
+	public java.lang.String toString()
 	{
 		return "ExecuteDeeplink";
 	}

@@ -20,7 +20,6 @@ import java.util.regex.Matcher;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import com.mendix.core.Core;
-import com.mendix.core.CoreException;
 import com.mendix.externalinterface.connector.RequestHandler;
 import com.mendix.logging.ILogNode;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
@@ -40,15 +39,15 @@ import system.proxies.User;
  * 
  * Returns true (always)
  */
-public class StartDeeplinkJava extends CustomJavaAction<Boolean>
+public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 {
 	public StartDeeplinkJava(IContext context)
 	{
 		super(context);
 	}
 
-	@Override
-	public Boolean executeAction() throws Exception
+	@java.lang.Override
+	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
 		Core.addRequestHandler(deeplink.proxies.constants.Constants.getRequestHandlerName()+ "/", new DeepLinkHandler());
@@ -59,8 +58,8 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 	/**
 	 * Returns a string representation of this action
 	 */
-	@Override
-	public String toString()
+	@java.lang.Override
+	public java.lang.String toString()
 	{
 		return "StartDeeplinkJava";
 	}
@@ -138,7 +137,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 				*	a new login page for the user instead of being logged in.
 				*/
 				if (request.getParameter(ARGUSER)!= null && request.getParameter(ARGPASS) != null) {
-                	if ( session == null || (session!=null && session.getUser().isAnonymous()) ) {
+                   if ( session == null || session.getUser(session.createContext()).isAnonymous() ) {
                     	if ( session == null ) 
                     		StartDeeplinkJava.logger.debug("No session found for deeplink: " + request.getResourcePath() + ", attempting login.");
                     	else	
@@ -165,17 +164,18 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 		}
 
 		private void serveDeeplink(String[] args, IMxRuntimeRequest request, IMxRuntimeResponse response, ISession existingsession) throws Exception {
-			IContext context = Core.createSystemContext();
-			IMendixObject deeplinkObj = query(context, DeepLink.getType(), DeepLink.MemberNames.Name, args[2]);
+			IContext systemContext = Core.createSystemContext();
+			IMendixObject deeplinkObj = query(systemContext, DeepLink.getType(), DeepLink.MemberNames.Name, args[2]);
 			ISession session = existingsession;
+			IContext sessionContext = session == null ? null : session.createContext();
 			
 			if (deeplinkObj == null) {
 				StartDeeplinkJava.logger.warn("Deeplink with name '" + args[2] + "' not found. ");
-				serve404(request, response, session == null ? null : session.getUser().getName());
+				serve404(request, response, session == null ? null : session.getUser(sessionContext).getName());
 				return;
 			}
 			
-			DeepLink deeplink = DeepLink.initialize(context, deeplinkObj);
+			DeepLink deeplink = DeepLink.initialize(systemContext, deeplinkObj);
 			
 			if (session == null) 
 			{
@@ -187,7 +187,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 					return;
 				}
 			}
-			else if (!deeplink.getAllowGuests().booleanValue() && session.getUser().isAnonymous()) //guest session, which is not allowed
+			else if (!deeplink.getAllowGuests().booleanValue() && session.getUser(sessionContext).isAnonymous()) //guest session, which is not allowed
 			{
 				serveLogin(request, response, DEFAULTLOGINTEXT);
 				return;
@@ -198,16 +198,14 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 				session.setUserAgent(userAgent);
 			}
 			
-			//switch to the users context
-			context = session.createContext(); 
-			IUser sessionUserObj = session.getUser();
+			IUser sessionUserObj = session.getUser(sessionContext);
 			String userName = sessionUserObj.getName();
 			
 			// Retrieve the language set for the deeplink.
 			Language language = deeplink.getDeepLink_Language();
 			if (language != null) {
 				// Deeplink has a language, put it on the session user.
-				User user = User.initialize(context, sessionUserObj.getMendixObject());
+				User user = User.initialize(sessionContext, sessionUserObj.getMendixObject());
 				user.setUser_Language(language);
 				user.commit();
 			}
@@ -215,13 +213,16 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 			//we have a valid session, further security is enforced by the application
 			
 			//first, remove old pending links
-			List<IMendixObject> pendinglinks = Core.retrieveXPathQueryEscaped(context, "//%s[%s='%s' and %s='%s']",
-					PendingLink.getType(), 
-					PendingLink.MemberNames.PendingLink_DeepLink.toString(), String.valueOf(deeplink.getMendixObject().getId().toLong()),
-					PendingLink.MemberNames.User.toString(), userName 
-			);
+			List<IMendixObject> pendinglinks = Core
+					.createXPathQuery(String.format("//%s[%s=$mxId and %s=$username]", 
+							PendingLink.getType(),
+							PendingLink.MemberNames.PendingLink_DeepLink.toString(),
+							PendingLink.MemberNames.User.toString()))
+					.setVariable("mxId", deeplink.getMendixObject().getId())
+					.setVariable("username", userName)
+					.execute(sessionContext);
 			
-			Core.delete(context, pendinglinks);
+			Core.delete(sessionContext, pendinglinks);
 			
 			//find the object, we search the object before serving the deeplink, to avoid loading the client for
 			//incorrect links
@@ -231,9 +232,9 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 				IMendixObject arg = null;
 				
 				if (deeplink.getObjectAttribute() == null || deeplink.getObjectAttribute().isEmpty()) 
-					arg = Core.retrieveId(context, Core.createMendixIdentifier(argument));
+					arg = Core.retrieveId(sessionContext, Core.createMendixIdentifier(argument));
 				else //use attr
-					arg = query(context, deeplink.getObjectType(), deeplink.getObjectAttribute(), argument); //argument is already escaped
+					arg = query(sessionContext, deeplink.getObjectType(), deeplink.getObjectAttribute(), argument); //argument is already escaped
 				
 				if (arg == null) 
 				{
@@ -246,9 +247,9 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 			}
 			
 			//then create a new pendinglink
-			PendingLink link = PendingLink.initialize(context, Core.instantiate(context, PendingLink.entityName));
+			PendingLink link = PendingLink.initialize(sessionContext, Core.instantiate(sessionContext, PendingLink.entityName));
 			link.setPendingLink_DeepLink(deeplink);
-			link.setUser(session.getUser().getName());
+			link.setUser(session.getUser(sessionContext).getName());
 			link.setArgument(theobject);
 			link.setSessionId(session.getId().toString());
 			
@@ -280,7 +281,7 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
                 }
 			}
 			
-			Core.commit(context, link.getMendixObject());
+			Core.commit(sessionContext, link.getMendixObject());
 			
 			//finally, redirect
 			response.setStatus(IMxRuntimeResponse.SEE_OTHER);
@@ -401,10 +402,14 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 	protected static IMendixObject query(IContext context, String type, Object field /* Enum value */, String value) 
 	{
 		try {
-			List<IMendixObject> result = Core.retrieveXPathQueryEscaped(context, "//%s[%s='%s']", 
-					type, field.toString(), value);
+			List<IMendixObject> result = Core
+					.createXPathQuery(String.format("//%s[%s=$value]", 
+							StringEscapeUtils.escapeXml(type),
+							StringEscapeUtils.escapeXml(field.toString())))
+					.setVariable("value", value)
+					.execute(context);
 			return result.size() > 0 ? result.get(0) : null;
-		} catch (CoreException e) {
+		} catch (Exception e) {
 			StartDeeplinkJava.logger.error("Error while executing query: ", e);
 			return null;
 		}
