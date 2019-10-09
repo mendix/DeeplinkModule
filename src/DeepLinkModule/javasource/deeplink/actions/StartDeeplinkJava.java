@@ -316,7 +316,7 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 			String password = request.getParameter(ARGPASS);
 						
 			try {
-				ISession session =  Core.login(username, password);
+				ISession session = Core.login(username, password, request);
 				StartDeeplinkJava.logger.info("Login OK: user '" + username + "'");
 				setCookies(response, session);
 				return session;				
