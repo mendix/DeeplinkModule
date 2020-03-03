@@ -218,7 +218,7 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 							PendingLink.getType(),
 							PendingLink.MemberNames.PendingLink_DeepLink.toString(),
 							PendingLink.MemberNames.User.toString()))
-					.setVariable("mxId", deeplink.getMendixObject().getId())
+					.setVariable("mxId", deeplink.getMendixObject().getId().toLong())
 					.setVariable("username", userName)
 					.execute(sessionContext);
 			
