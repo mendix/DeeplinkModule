@@ -10,7 +10,6 @@
 package test.actions;
 
 import com.mendix.systemwideinterfaces.core.ISession;
-import com.mendix.systemwideinterfaces.core.UserAction;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
 

@@ -279,6 +279,12 @@ public class StartDeeplinkJava extends CustomJavaAction<Boolean>
 				location = DEFAULT_INDEX_LOCATION;
 			
 			response.addHeader("location", getRelPath(request) + location);
+		
+			// this line below adds a cookie header for identifying the request in Dynatrace (or other purposes), 
+			// it will be passed on to the following (redirected) request.
+			// The cookie has an expiry time of 1 second so that it will expire before being
+			// propagated to all subsequent requests after the redirect
+			response.addCookie("Deeplink", args[1]+"/"+args[2], "/", "", 1, true);
 		}
 
 		private ISession createGuestSession(IMxRuntimeResponse response) throws Exception {
