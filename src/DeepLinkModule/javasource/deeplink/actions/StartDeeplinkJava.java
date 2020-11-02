@@ -112,7 +112,7 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
              * a 200 OK tells word the end of the redirect is reached, and it will happily open the 
              * original URL in your default browser... 
              */
-            if (request.getHeader("User-Agent").toLowerCase().contains("office")) {
+            if (request.getHeader("User-Agent") != null && request.getHeader("User-Agent").toLowerCase().contains("office")) {
                 response.setStatus(IMxRuntimeResponse.OK);
                 return;
             }
