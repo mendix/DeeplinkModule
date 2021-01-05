@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 	 *  and we need to uniquely identify the current user before redirecting to the client app, 
 	 *  which should pick the information up after starting
 	 */
-	class DeepLinkHandler extends RequestHandler {
+	static class DeepLinkHandler extends RequestHandler {
 		private static final String DEFAULTLOGINTEXT = "Sign in";
 		private static final String ERRORLOGINTEXT = "The username or password you entered is incorrect.";
 		private static final String XAS_ID = "XASID";
@@ -93,24 +94,23 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 		private static final String ENCODING = "UTF-8";
 		private static final String ARGUSER = "username";
 		private static final String ARGPASS = "password";
-		private String loginLocation = emptyStringToNull((String) Core.getConfiguration().getConstantValue("DeepLink.LoginLocation"));
+		private static final String loginLocation = emptyStringToNull((String) Core.getConfiguration().getConstantValue("DeepLink.LoginLocation"));
 		private static final String	INDEX_CONSTANT	= "DeepLink.IndexPage";
 		private static final String	DEFAULT_INDEX_LOCATION	= "index.html";
 		
 		@Override
-		public void processRequest(IMxRuntimeRequest request,
-				IMxRuntimeResponse response, String arg2) throws Exception 
+		public void processRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String arg2)
 		{
-		    /** BJHL - CC0000000100277
-             * Office (esp. Word) opens links by fetching the URL using its own cookies, following 
-             * any redirects and opening the resulting location in a browser. The browser will then
-             * send its cookies, which ultimately results in a session mismatch between word and
-             * the browser, causing the pending deeplink to be created for the wrong session. This
-             * is a know problem with word: 
-             *   https://stackoverflow.com/questions/1421608/how-does-ms-word-open-a-hyperlink
-             * To "fix" this, ignore any requests where the user-agent contains "office". Sending
-             * a 200 OK tells word the end of the redirect is reached, and it will happily open the 
-             * original URL in your default browser... 
+		    /* BJHL - CC0000000100277
+              Office (esp. Word) opens links by fetching the URL using its own cookies, following
+              any redirects and opening the resulting location in a browser. The browser will then
+              send its cookies, which ultimately results in a session mismatch between word and
+              the browser, causing the pending deeplink to be created for the wrong session. This
+              is a know problem with word:
+                https://stackoverflow.com/questions/1421608/how-does-ms-word-open-a-hyperlink
+              To "fix" this, ignore any requests where the user-agent contains "office". Sending
+              a 200 OK tells word the end of the redirect is reached, and it will happily open the
+              original URL in your default browser...
              */
             if (request.getHeader("User-Agent").toLowerCase().contains("office")) {
                 response.setStatus(IMxRuntimeResponse.OK);
@@ -130,11 +130,11 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 				
 				ISession session = this.getSessionFromRequest(request);
 				
-				/** RSA - Ticket #102924
-				*	User wasn't able to login after logging out and using the deeplink url(serving a
-				*	login page) again. After logout the user kept the session, but was anonymous.
-				*	When having a session, the 'performLogin' method was not called, resulting in 
-				*	a new login page for the user instead of being logged in.
+				/* RSA - Ticket #102924
+					User wasn't able to login after logging out and using the deeplink url(serving a
+					login page) again. After logout the user kept the session, but was anonymous.
+					When having a session, the 'performLogin' method was not called, resulting in
+					a new login page for the user instead of being logged in.
 				*/
 				if (request.getParameter(ARGUSER)!= null && request.getParameter(ARGPASS) != null) {
                    if ( session == null || session.getUser(session.createContext()).isAnonymous() ) {
@@ -178,7 +178,7 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 			DeepLink deeplink = DeepLink.initialize(systemContext, deeplinkObj);
 			
 			if (session == null) {
-				if (deeplink.getAllowGuests().booleanValue()) {
+				if (deeplink.getAllowGuests()) {
 					session = createGuestSession(response);
 					sessionContext = session.createContext();
 				} else // session is required
@@ -187,14 +187,14 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 					return;
 				}
 			}
-			else if (!deeplink.getAllowGuests().booleanValue() && session.getUser(sessionContext).isAnonymous()) //guest session, which is not allowed
+			else if (!deeplink.getAllowGuests() && session.getUser(sessionContext).isAnonymous()) //guest session, which is not allowed
 			{
 				serveLogin(request, response, DEFAULTLOGINTEXT);
 				return;
 			}
 
 			String userAgent = request.getHeader("user-agent");
-			if (userAgent != null && session != null) {
+			if (userAgent != null) {
 				session.setUserAgent(userAgent);
 			}
 			
@@ -226,10 +226,10 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 			
 			//find the object, we search the object before serving the deeplink, to avoid loading the client for
 			//incorrect links
-			Long theobject = 0L;
+			long theobject = 0L;
 			if (!deeplink.getUseStringArgument() && deeplink.getObjectType() != null && !deeplink.getObjectType().isEmpty()) {
 				String argument = args.length < 4 ? "" : (args[3] == null ? "" : args[3]); 
-				IMendixObject arg = null;
+				IMendixObject arg;
 				
 				if (deeplink.getObjectAttribute() == null || deeplink.getObjectAttribute().isEmpty()) 
 					arg = Core.retrieveId(sessionContext, Core.createMendixIdentifier(argument));
@@ -310,8 +310,7 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 			response.addCookie(XAS_ID, "0."+Core.getXASId(),"/", "", -1, true);			 
 		}
 
-		private ISession performLogin(IMxRuntimeRequest request,
-				IMxRuntimeResponse response) throws Exception {
+		private ISession performLogin(IMxRuntimeRequest request, IMxRuntimeResponse response) {
 			String username = request.getParameter(ARGUSER);
 			String password = request.getParameter(ARGPASS);
 						
@@ -328,12 +327,11 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 		}
 
 		private String getRelPath(IMxRuntimeRequest request) {
-			String res = "";
+			StringBuilder res = new StringBuilder();
 			int length = request.getResourcePath().split("/").length +
 				(request.getResourcePath().endsWith("/") ? 0 : -1);
-			for(int i1 = 0; i1 < length; i1++)
-				res+= "../";
-			return res;
+			res.append("../".repeat(Math.max(0, length)));
+			return res.toString();
 		}
 		
 		private void serveLogin(IMxRuntimeRequest request,
@@ -344,19 +342,19 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 				url = url.substring(1);
 			}
 			if (qs != null && !qs.equals("")) {
-			    qs = URLDecoder.decode(qs, "UTF-8");
-			    url = url + "?" + URLEncoder.encode(qs, "UTF-8");
+			    qs = URLDecoder.decode(qs, StandardCharsets.UTF_8);
+			    url = url + "?" + URLEncoder.encode(qs, StandardCharsets.UTF_8);
 			}
 				
 			//use alternative login?
-			if (this.loginLocation != null) {
-				StartDeeplinkJava.logger.debug("Redirecting to login location: " + this.loginLocation + " " + url );
+			if (loginLocation != null) {
+				StartDeeplinkJava.logger.debug("Redirecting to login location: " + loginLocation + " " + url );
 				response.setStatus(IMxRuntimeResponse.SEE_OTHER);
-				response.addHeader("location", this.loginLocation + url);
+				response.addHeader("location", loginLocation + url);
 				return;
 			}
 			
-			Map<String, String> args = new HashMap<String, String>();
+			Map<String, String> args = new HashMap<>();
 			args.put("url", url);
 			args.put("result", result);
 			args.put("relpath", getRelPath(request));
@@ -368,7 +366,7 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 		private void serve404(IMxRuntimeRequest request, IMxRuntimeResponse response, String user) throws IOException {
 		    String qs = request.getHttpServletRequest().getQueryString();
             		    
-		    Map<String, String> args = new HashMap<String, String>();
+		    Map<String, String> args = new HashMap<>();
 			args.put("url",     request.getResourcePath() + ((qs != null && !qs.equals("")) ? "?" + qs : ""));
 			args.put("user",    user == null ? "" : " (" + user + ")");
 			args.put("relpath", getRelPath(request));
@@ -391,7 +389,7 @@ public class StartDeeplinkJava extends CustomJavaAction<java.lang.Boolean>
 			if (params != null)
 				for(String key : params.keySet())
 					if (params.get(key) != null)
-						line = line.replaceAll("\\{"+key.toUpperCase()+"\\}", Matcher.quoteReplacement(StringEscapeUtils.escapeHtml4(params.get(key))));
+						line = line.replaceAll("\\{"+key.toUpperCase()+"}", Matcher.quoteReplacement(StringEscapeUtils.escapeHtml4(params.get(key))));
 			return line;
 		}	
 	}

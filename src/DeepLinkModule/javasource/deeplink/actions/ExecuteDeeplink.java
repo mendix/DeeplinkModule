@@ -10,6 +10,7 @@
 package deeplink.actions;
 
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -47,7 +48,13 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 
 		// BEGIN USER CODE
 		try {
+			if (this.pendinglink == null) {
+				StartDeeplinkJava.logger.warn("Pending link not found");
+				return false;
+			}
+
 			DeepLink link = this.pendinglink.getPendingLink_DeepLink();
+
 			if (link == null) {
 				StartDeeplinkJava.logger.warn("Pending link found, but there was no associated deeplink for user: " + this.pendinglink.getUser());
 				return false;
@@ -91,9 +98,9 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 				//string argument
                 } else if (link.getUseStringArgument()) {
                     Map<String, IDataType> params = Core.getInputParameters(link.getMicroflow());
-                    Map<String, Object> args = new HashMap<String, Object>();
+                    Map<String, Object> args = new HashMap<>();
                     String allArguments = this.pendinglink.getStringArgument();
-                    allArguments = URLDecoder.decode(allArguments,"UTF-8");
+                    allArguments = URLDecoder.decode(allArguments, StandardCharsets.UTF_8);
                     // If we should separate the GET params, and there is at least one, process them
                     if (link.getSeparateGetParameters() && (allArguments.contains("=") || allArguments.contains("&"))) {
                         String[] arguments = allArguments.split("&");
@@ -163,7 +170,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 	    if( "".equals(argument) )
 			return;
 
-		String key = "";
+		String key;
 		String value = "";
 		if( argument.contains("=") ) {
 			key = argument.substring(0, argument.indexOf("=") );

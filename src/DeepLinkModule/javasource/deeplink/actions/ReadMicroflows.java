@@ -57,7 +57,7 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 			for (IMetaPrimitive prim : meta.getMetaPrimitives())
 				if (!prim.isVirtual())
 				{
-					Attribute attr = Attribute.initialize(c, Core.instantiate(c, Attribute.entityName));;
+					Attribute attr = Attribute.initialize(c, Core.instantiate(c, Attribute.entityName));
 					attr.setName(prim.getName());
 					attr.setAttribute_Entity(entity);
 					Core.commit(c, attr.getMendixObject());
@@ -73,7 +73,7 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 			boolean stringarg = false;
 			boolean objectarg = false;
 			boolean applicableForDeeplink = true;
-			String argumentExample = "";
+			StringBuilder argumentExample = new StringBuilder();
 			
 			for (Entry<String, IDataType> entry : args.entrySet()) {
 				hasarg = true;
@@ -81,12 +81,12 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
                 
 				//Special case, string type argument
 				if (type.getType() == DataTypeEnum.String) {
-					argumentExample += entry.getKey() + "=YourValue&";
+					argumentExample.append(entry.getKey()).append("=YourValue&");
 					stringarg = true;
 				} else if( type.getType() == DataTypeEnum.Object ) {
 					IMendixObject mo = StartDeeplinkJava.query(
 					        c, Entity.getType(), Entity.MemberNames.Name, type.getObjectType());
-                    argumentExample = "YourValue&";
+                    argumentExample = new StringBuilder("YourValue&");
                     if (mo != null) {
                         datatype = mo;
                         stringarg = false;
@@ -104,11 +104,11 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 			if (!applicableForDeeplink || datatype == null && hasarg && !stringarg) //datatype is not entity or string
 				continue;
 			
-			Microflow flow = Microflow.initialize(c, Core.instantiate(c, Microflow.entityName));;
+			Microflow flow = Microflow.initialize(c, Core.instantiate(c, Microflow.entityName));
 			flow.setName(mf);
 			flow.setModule(mf.substring(0,mf.indexOf('.')));
 			
-			if( !"".equals(argumentExample) )
+			if( !"".equals(argumentExample.toString()) )
 				flow.setArgumentExample((stringarg?"?":"/") + argumentExample.substring(0,argumentExample.length()-1));
 			if (datatype != null)
 				flow.setparam(Entity.initialize(c, datatype));
