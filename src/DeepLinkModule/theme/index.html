@@ -6,26 +6,26 @@
         <title>Mendix</title>
         <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,300' rel='stylesheet' type='text/css'>
-        <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css?{{cachebust}}">
-        <link rel="stylesheet" href="mxclientsystem/mxui/ui/mxui.css?{{cachebust}}">
-        <!-- Want to use SCSS? Place the line below between comments -->
-        <link rel="stylesheet" href="styles/lib/lib.css?{{cachebust}}">
-        <link rel="stylesheet" href="styles/custom.css?{{cachebust}}">
+
+        {{themecss}}
+        {{appicons}}
+
+        <!-- STARTUP IMAGES -->
+        <!-- <link href="resources/ios/startup/apple-touch-startup-image-1496x2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" rel="apple-touch-startup-image"> -->
+
     </head>
     <body dir="ltr">
         <div id="content"></div>
         <script>
             dojoConfig = {
-                isDebug: false,
-                rtlRedirect: "index-rtl.html?{{cachebust}}",
                 baseUrl: "mxclientsystem/dojo/",
-				cacheBust: "{{cachebust}}"
+                cacheBust: "{{cachebust}}",
+                rtlRedirect: "index-rtl.html"
             };
         </script>
         <script>
             if (!document.cookie || !document.cookie.match(/(^|;)originURI=/gi))
-                document.cookie = "originURI=/login.html";
+                document.cookie = "originURI=/login.html" + (window.location.protocol === "https:" ? ";SameSite=None;Secure" : "");
         </script>
         <script src="mxclientsystem/mxui/mxui.js?{{cachebust}}"></script>
     </body>
