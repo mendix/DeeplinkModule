@@ -10,11 +10,12 @@
 package deeplink.actions;
 
 import java.net.URLDecoder;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import com.mendix.core.Core;
 import com.mendix.core.CoreException;
+import com.mendix.core.actionmanagement.MicroflowCallBuilder;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IDataType;
 import com.mendix.systemwideinterfaces.core.IFeedback.MessageType;
@@ -51,33 +52,47 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 				StartDeeplinkJava.logger.warn("Pending link found, but there was no associated deeplink for user: " + this.pendinglink.getUser());
 				return false;
 			}
-			
+
 			IMendixObject arg = null;
-			if (!link.getUseStringArgument() && link.getObjectType() != null && !link.getObjectType().isEmpty()) 
+			if (!link.getUseStringArgument() && link.getObjectType() != null && !link.getObjectType().isEmpty())
 			{
 				try {
 					arg = Core.retrieveId(getContext(), Core.createMendixIdentifier(this.pendinglink.getArgument()));
 				} catch (CoreException e) {
 					StartDeeplinkJava.logger.warn("Unable to retrieve " + this.pendinglink.getArgument(), e);
 				}
-				if (arg == null) 
+				if (arg == null)
 				{
 				    FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.WARNING, "DeepLink failed to load link, since the object with ID " + this.pendinglink.getArgument() + " no longer exists or the user has no access to read the object", false);
 					return false;
 				}
 			}
-			
+
 			//invoke the microflow
 			try {
 				//object argument
 				if (arg != null) {
-					Core.execute(getContext(), link.getMicroflow(), arg);
+					List<String> attributes = Core.getInputParameters(link.getMicroflow()).entrySet()
+							.stream()
+							.filter(entry -> link.getObjectType().equals(entry.getValue().getObjectType()))
+							.map(Entry::getKey).collect(Collectors.toList());
+
+					MicroflowCallBuilder microflowCallBuilder = Core.microflowCall(link.getMicroflow());
+
+					if (attributes.size() > 0) {
+						microflowCallBuilder = microflowCallBuilder.withParam(attributes.get(0), arg);
+					}
+
+					if (attributes.size() > 1) {
+						StartDeeplinkJava.logger.warn("2 parameters of the same type were found. We will use the first one.");
+					}
+
+					microflowCallBuilder.inTransaction(true).execute(getContext());
 				//string argument
                 } else if (link.getUseStringArgument()) {
                     Map<String, IDataType> params = Core.getInputParameters(link.getMicroflow());
                     Map<String, Object> args = new HashMap<String, Object>();
                     String allArguments = this.pendinglink.getStringArgument();
-                    
                     allArguments = URLDecoder.decode(allArguments,"UTF-8");
                     // If we should separate the GET params, and there is at least one, process them
                     if (link.getSeparateGetParameters() && (allArguments.contains("=") || allArguments.contains("&"))) {
@@ -87,7 +102,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
                         }
                     // When we don't have a = or & in the arguments, there is no get param
                     // Or if we shouldn't separate, just put the entire string in the first String argument
-                    } else { 
+                    } else {
                         for (Entry<String, IDataType> keyset : params.entrySet()) {
                             if (keyset.getValue().getType() == IDataType.DataTypeEnum.String) {
                                 args.put(keyset.getKey(), allArguments);
@@ -96,32 +111,32 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
                         }
                     }
 
-                    Core.execute(getContext(), link.getMicroflow(), args);
+					Core.microflowCall(link.getMicroflow()).withParams(args).execute(getContext());
                 } else { //no argument
-					Core.execute(getContext(), link.getMicroflow());
-                }
-			
-			} catch (CoreException e) {
+					Core.microflowCall(link.getMicroflow()).execute(getContext());
+				}
+
+			} catch (Exception e) {
 			    FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.WARNING, "Failed to execute microflow for deeplink " + link.getName() + ", check the log for details", false);
 				StartDeeplinkJava.logger.error("Failed to execute deeplink " + link.getName(), e);
 				return false;
 			}
-			
-			
+
+
 			//remove the pendinglink, unless it should be reused during this session..
-			if (link.getUseAsHome()) { //do not remove if used as home. 
+			if (link.getUseAsHome()) { //do not remove if used as home.
 				this.pendinglink.setSessionId(this.getContext().getSession().getId().toString());
 				Core.commit(this.getContext(), this.pendinglink.getMendixObject());
 			}
 			else {
 				Core.delete(this.getContext(), this.pendinglink.getMendixObject());
 			}
-			
+
 			//set hitcount (note, this might not be exact)
 			IContext sudoContext = getContext().createSudoClone();
 			link.setHitCount(sudoContext, link.getHitCount(getContext().createSudoClone()) + 1);
 			Core.commit(sudoContext, link.getMendixObject());
-			
+
 			return true;
 		}
 		catch (Exception e)
@@ -147,7 +162,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 		// skip empty arguments
 	    if( "".equals(argument) )
 			return;
-		
+
 		String key = "";
 		String value = "";
 		if( argument.contains("=") ) {
@@ -157,7 +172,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 			key = argument;
 			// value = empty string
 		}
-		
+
 		if( params.containsKey(key) ) {
 		    // if already exists (array get param), concat to end.
 		    if (args.containsKey(key)) {
@@ -174,9 +189,9 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 					    value = args.get(testKey) + "-" + value;
 					}
 				    args.put(param.getKey(), value);
-					
+
 				    StartDeeplinkJava.logger.trace("Adding parameter: " + param.getKey() + " from key: " + key + " and value: " + value );
-					
+
 					paramMatched = true;
 					break;
 				}
@@ -184,7 +199,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 			if( !paramMatched )
 				StartDeeplinkJava.logger.warn("Parameter: (" + key + ") found, but no matching mf parameter exists");
 		}
-		
+
 	}
 	// END EXTRA CODE
 }
