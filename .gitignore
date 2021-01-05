@@ -10,3 +10,5 @@ src/DeepLinkModule/javasource/test/proxies/
 src/DeepLinkModule/[App Store] Deeplink.mpr.lock
 *.lock
 .DS_Store
+bin
+.idea
