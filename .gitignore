@@ -12,3 +12,4 @@ src/DeepLinkModule/[App Store] Deeplink.mpr.lock
 .DS_Store
 bin
 .idea
+*.bak
