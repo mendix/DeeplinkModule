@@ -84,11 +84,16 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 					argumentExample.append(entry.getKey()).append("=YourValue&");
 					stringarg = true;
 				} else if( type.getType() == DataTypeEnum.Object ) {
-					IMendixObject mo = StartDeeplinkJava.query(
-					        c, Entity.getType(), Entity.MemberNames.Name, type.getObjectType());
+					List<IMendixObject> moList = Core.createXPathQuery(
+							String.format("//%s[%s=$value]", 
+								Entity.getType(),
+								Entity.MemberNames.Name))
+							.setVariable("value", type.getObjectType())
+							.execute(c);
+
                     argumentExample = new StringBuilder("YourValue&");
-                    if (mo != null) {
-                        datatype = mo;
+                    if (moList.size() > 0) {
+                        datatype = moList.get(0);
                         stringarg = false;
                         objectarg = true;
                     }
