@@ -222,7 +222,7 @@ class DeeplinkRequest {
 		this._deeplinkName = splitted_path.get(0);
 		splitted_path.remove(0);
 		
-		if(splitted_path.size()>1) {
+		if(splitted_path.size()>=1) {
 			this._pathArgument = splitted_path.get(0);
 		}
 
