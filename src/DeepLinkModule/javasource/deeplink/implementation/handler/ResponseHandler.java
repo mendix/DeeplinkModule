@@ -61,7 +61,7 @@ public class ResponseHandler {
 			
 			if(locationSSOHandler.endsWith("=")) {
 				
-				String pathinfo = request.getHttpServletRequest().getPathInfo(); 
+				String pathinfo = ensureStartingSlash(request.getHttpServletRequest().getPathInfo()); 
 				String querystring = request.getHttpServletRequest().getQueryString();
 				
 				if(SSOHANDLER!=null && SSOHANDLER.length()>0) {
@@ -89,28 +89,52 @@ public class ResponseHandler {
 	
 	public static void serveLogin(IMxRuntimeRequest request,IMxRuntimeResponse response) throws UnsupportedEncodingException {
 	
-		String redirectLocation = LOGINPAGE;
+		String loginLocation = LOGINPAGE;
 		String requestURL = request.getHttpServletRequest().getRequestURL().toString();
+		String requestPathInfo= request.getHttpServletRequest().getPathInfo();
+		String requesthost = requestURL.substring(0,requestURL.indexOf(requestPathInfo));
 		
-		requestURL = requestURL.substring(0, requestURL.indexOf(ensureStartingSlash(deeplink.proxies.constants.Constants.getRequestHandlerName())));
+		String queryString = request.getHttpServletRequest().getQueryString();
+		
+		String continuationURL = "";
 		
 		if(Constants.getLoginLocation()!=null && Constants.getLoginLocation().length()>0)
-			redirectLocation = Constants.getLoginLocation();
-			
-			if(redirectLocation.endsWith("=")) {
-				if(SSOHANDLER!=null && SSOHANDLER.length()>0) {
-					redirectLocation += URLEncoder.encode(requestURL +SSOHANDLER, java.nio.charset.StandardCharsets.UTF_8.toString()); 
+			loginLocation = Constants.getLoginLocation();
+
+			if(loginLocation.endsWith("=")) {
+				
+				if(loginLocation.startsWith("http") && !requestURL.startsWith(loginLocation)) {
+					
+					continuationURL += requesthost; 
+					
+					//external location, make sure continuation routes via SSOHandler.
+					if(SSOHANDLER!=null && SSOHANDLER.length()>0 && !loginLocation.startsWith(SSOHANDLER)) {
+						continuationURL += SSOHANDLER;
+					}
+					
+				}
+				if(requestPathInfo!=null) {
+					continuationURL += requestPathInfo;
+				}
+				if(queryString != null) {
+					continuationURL += "?" + queryString;
 				}
 				
-				redirectLocation += URLEncoder.encode(request.getHttpServletRequest().getRequestURL().toString(), java.nio.charset.StandardCharsets.UTF_8.toString());
+				if(continuationURL != null && continuationURL.length()>0 ) {
+					loginLocation += URLEncoder.encode(continuationURL, java.nio.charset.StandardCharsets.UTF_8.toString());
+				}
 			}
 		
-		if(!redirectLocation.startsWith("http")) {
-			redirectLocation = ensureStartingSlash(redirectLocation);
+		if(!loginLocation.startsWith("http")) {
+			loginLocation = ensureStartingSlash(loginLocation);
+		}
+		
+		if(!deeplink.proxies.constants.Constants.getEnableLeadingSlash()) {
+			loginLocation = ensureNoStartingSlash(loginLocation);
 		}
 			
 		response.setStatus(IMxRuntimeResponse.SEE_OTHER);
-		response.addHeader("location", redirectLocation);
+		response.addHeader("location", loginLocation);
 
 	}
 	
@@ -122,6 +146,18 @@ public class ResponseHandler {
 		
 		if(!s.startsWith("/")) {
 			s = "/" + s;
+		}
+		return s;
+	}
+	
+	private static String ensureNoStartingSlash(String s) {
+		
+		if(s == null) {
+			return null;
+		}
+		
+		if(!s.startsWith("/")) {
+			s = s.substring(1);
 		}
 		return s;
 	}

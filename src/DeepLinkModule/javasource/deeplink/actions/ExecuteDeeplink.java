@@ -98,28 +98,39 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 					microflowCallBuilder.inTransaction(true).execute(getContext());
 				//string argument
                 } else if (link.getUseStringArgument()) {
-                    Map<String, IDataType> params = Core.getInputParameters(link.getMicroflow());
-                    Map<String, Object> args = new HashMap<>();
+                    
+                	Map<String, IDataType> mfParams = Core.getInputParameters(link.getMicroflow());
+                	Map<String, Object> inputParameterValues = new HashMap<>();
+
                     String allArguments = this.pendinglink.getStringArgument();
                     allArguments = URLDecoder.decode(allArguments, StandardCharsets.UTF_8.toString());
-                    // If we should separate the GET params, and there is at least one, process them
-                    if (link.getSeparateGetParameters() && (allArguments.contains("=") || allArguments.contains("&"))) {
-                        String[] arguments = allArguments.split("&");
-                        for (String argument : arguments) {
-                            processArgument(argument, params, args);
-                        }
-                    // When we don't have a = or & in the arguments, there is no get param
-                    // Or if we shouldn't separate, just put the entire string in the first String argument
-                    } else {
-                        for (Entry<String, IDataType> keyset : params.entrySet()) {
-                            if (keyset.getValue().getType() == IDataType.DataTypeEnum.String) {
-                                args.put(keyset.getKey(), allArguments);
-                                break;
-                            }
-                        }
+                    
+                    if (mfParams.size() == 1) {
+                    	Map.Entry<String,IDataType> entry = mfParams.entrySet().iterator().next();
+                    	IDataType parameterDataType = entry.getValue();
+                    	if (parameterDataType.getType() == IDataType.DataTypeEnum.String) {
+                    		if ((allArguments.contains(entry.getKey()+"=") || allArguments.contains(entry.getKey().toLowerCase()+"="))) {
+                    			inputParameterValues.put(entry.getKey(), allArguments.split("=")[1]);
+                    		}
+                    		else {
+                    			inputParameterValues.put(entry.getKey(), allArguments);
+                    		}
+                    	}
+                    }
+                    else if(mfParams.size()>1) {
+                    	if(allArguments.contains("?") && allArguments.contains("=")) {
+                    		String[] arguments = allArguments.substring(allArguments.indexOf("?")+1).split("&");
+                    		for (String argument : arguments) {
+                    			processArgument(argument, mfParams, inputParameterValues);
+                    		}
+                		}
+                    	else {
+                    		Map.Entry<String,IDataType> entry = mfParams.entrySet().iterator().next();
+                    		inputParameterValues.put(entry.getKey(), allArguments);
+                    	}
                     }
 
-					Core.microflowCall(link.getMicroflow()).withParams(args).execute(getContext());
+					Core.microflowCall(link.getMicroflow()).withParams(inputParameterValues).execute(getContext());
                 } else { //no argument
 					Core.microflowCall(link.getMicroflow()).execute(getContext());
 				}

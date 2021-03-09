@@ -112,9 +112,8 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 			Microflow flow = Microflow.initialize(c, Core.instantiate(c, Microflow.entityName));
 			flow.setName(mf);
 			flow.setModule(mf.substring(0,mf.indexOf('.')));
+			flow.setFriendlyName(mf.substring(mf.indexOf('.')+1));
 			
-			if( !"".equals(argumentExample.toString()) )
-				flow.setArgumentExample((stringarg?"?":"/") + argumentExample.substring(0,argumentExample.length()-1));
 			if (datatype != null)
 				flow.setparam(Entity.initialize(c, datatype));
 			if (stringarg)

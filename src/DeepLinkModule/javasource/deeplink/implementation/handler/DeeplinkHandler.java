@@ -104,13 +104,7 @@ public class DeeplinkHandler extends RequestHandler {
 		newPendingLink.setUser(session.getUserName());
 		
 		if (deepLinkConfigurationObject.getUseStringArgument()) {
-			
-			if(!deepLinkConfigurationObject.getSeparateGetParameters()) {
-				newPendingLink.setStringArgument(deepLinkRequest.getPath());
-			}
-			else {
-				newPendingLink.setStringArgument(deepLinkRequest.getQueryString());
-			}
+			newPendingLink.setStringArgument(deepLinkRequest.getPath());
 		}
 		
 		if(deepLinkConfigurationObject.getObjectType() != null && deepLinkConfigurationObject.getObjectType().length() > 0 ) {
@@ -216,6 +210,10 @@ class DeeplinkRequest {
 		String path = request.getResourcePath().replaceFirst("/" + Constants.getRequestHandlerName() +"/", "");
 		String querystring = request.getHttpServletRequest().getQueryString();
 		
+		if(querystring != null && querystring.contains("sso_callback=true")) {
+			querystring = querystring.replaceAll("&sso_callback=true", "");
+			querystring = querystring.replaceAll("sso_callback=true", "");
+		}
 		
 		List<String> splitted_path = new LinkedList<String>(Arrays.asList(path.split("/")));		
 		
@@ -228,8 +226,8 @@ class DeeplinkRequest {
 
 		this._path = String.join("/", splitted_path);  
 		
-		if(request.getHttpServletRequest().getQueryString()!=null) {
-			this._path += "?" + request.getHttpServletRequest().getQueryString();
+		if(querystring!=null && querystring.length()>0) {
+			this._path += "?" + querystring;
 		}
 		
 		this._queryString = querystring != null ? querystring : "";
