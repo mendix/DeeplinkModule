@@ -37,13 +37,9 @@ public class GetAttributeValueByEntityName extends CustomJavaAction<java.lang.St
 				.setOffset(0)
 				.setAmount(1)
 				.execute(getContext());
+			
+			return list.size()==1 ? list.get(0).getValue(getContext(), AttributeName).toString() : null;
 
-			if(list.size()==1) {
-				return list.get(0).getValue(getContext(), AttributeName).toString();
-			}
-			else {
-				return null;
-			}
 		}
 		catch (Exception e) {
 			Core.getLogger(deeplink.implementation.Commons.logNodeName).error("Unable to retrieve a random object for entity: " + e.getMessage());
