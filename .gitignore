@@ -8,7 +8,10 @@ src/DeepLinkModule/javasource/deeplink/proxies/
 src/DeepLinkModule/javasource/system/
 src/DeepLinkModule/javasource/test/proxies/
 src/DeepLinkModule/[App Store] Deeplink.mpr.lock
+src/DeepLinkModule/.settings
 *.lock
 .DS_Store
 bin
 .idea
+*.bak
+GPUCache
