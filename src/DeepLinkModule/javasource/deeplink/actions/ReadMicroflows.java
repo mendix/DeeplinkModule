@@ -73,7 +73,6 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 			boolean stringarg = false;
 			boolean objectarg = false;
 			boolean applicableForDeeplink = true;
-			StringBuilder argumentExample = new StringBuilder();
 			
 			for (Entry<String, IDataType> entry : args.entrySet()) {
 				hasarg = true;
@@ -81,19 +80,17 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
                 
 				//Special case, string type argument
 				if (type.getType() == DataTypeEnum.String) {
-					argumentExample.append(entry.getKey()).append("=YourValue&");
 					stringarg = true;
 				} else if( type.getType() == DataTypeEnum.Object ) {
-					List<IMendixObject> moList = Core.createXPathQuery(
+					List<IMendixObject> microflowList = Core.createXPathQuery(
 							String.format("//%s[%s=$value]", 
 								Entity.getType(),
 								Entity.MemberNames.Name))
 							.setVariable("value", type.getObjectType())
 							.execute(c);
 
-                    argumentExample = new StringBuilder("YourValue&");
-                    if (moList.size() > 0) {
-                        datatype = moList.get(0);
+                    if (microflowList.size() > 0) {
+                        datatype = microflowList.get(0);
                         stringarg = false;
                         objectarg = true;
                     }
