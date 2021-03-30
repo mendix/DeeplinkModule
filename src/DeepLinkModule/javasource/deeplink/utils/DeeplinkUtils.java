@@ -1,11 +1,13 @@
 package deeplink.utils;
 
+import java.util.InputMismatchException;
 import java.util.List;
 
 import com.mendix.core.Core;
 import com.mendix.logging.ILogNode;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
+
 
 import deeplink.proxies.DeepLink;
 import deeplink.proxies.microflows.Microflows;
@@ -23,6 +25,11 @@ public class DeeplinkUtils {
 				.execute(context);
 		
 		DeepLink deeplink = null;
+		
+		if((entity == null) != (attribute==null))
+		{
+			throw new IllegalArgumentException("The value of parameters 'entity' and 'attribute' should both be either null or not null.");
+		}
 		
 		if(list.size()>=1) {
 			deeplink = DeepLink.initialize(context, list.get(0));
@@ -44,6 +51,7 @@ public class DeeplinkUtils {
 			deeplink.setMicroflow(microflowName);
 			deeplink.setName(deeplinkName);
 			deeplink.setUseAsHome(keepAsHomeDeeplink);
+			
 			deeplink.setObjectType(entity);
 			deeplink.setObjectAttribute(attribute);
 			
