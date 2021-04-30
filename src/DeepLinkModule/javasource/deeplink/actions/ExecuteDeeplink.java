@@ -100,7 +100,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
                     Map<String, IDataType> params = Core.getInputParameters(link.getMicroflow());
                     Map<String, Object> args = new HashMap<>();
                     String allArguments = this.pendinglink.getStringArgument();
-                    allArguments = URLDecoder.decode(allArguments, StandardCharsets.UTF_8);
+                    
                     // If we should separate the GET params, and there is at least one, process them
                     if (link.getSeparateGetParameters() && (allArguments.contains("=") || allArguments.contains("&"))) {
                         String[] arguments = allArguments.split("&");
