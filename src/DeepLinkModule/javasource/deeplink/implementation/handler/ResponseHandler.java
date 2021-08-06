@@ -66,6 +66,10 @@ public class ResponseHandler {
 				String pathinfo = ensureStartingSlash(request.getHttpServletRequest().getPathInfo()); 
 				String querystring = request.getHttpServletRequest().getQueryString();
 				
+				if(!deeplink.proxies.constants.Constants.getEnableLeadingSlash()) {
+					pathinfo = ensureNoStartingSlash(pathinfo);
+				}
+				
 				if(SSOHANDLER!=null && SSOHANDLER.length()>0) {
 					if(querystring!=null && querystring.length() > 0) { 
 						querystring = "?" + querystring;
@@ -128,7 +132,13 @@ public class ResponseHandler {
 					
 				}
 				if(requestPathInfo!=null) {
-					continuationURL += requestPathInfo;
+					
+					if(!deeplink.proxies.constants.Constants.getEnableLeadingSlash()) {
+						continuationURL += ensureNoStartingSlash(requestPathInfo);
+					}
+					else {
+						continuationURL += requestPathInfo;
+					}
 				}
 				if(queryString != null) {
 					continuationURL += "?" + queryString;
@@ -141,10 +151,6 @@ public class ResponseHandler {
 		
 		if(!loginLocation.startsWith("http")) {
 			loginLocation = ensureStartingSlash(loginLocation);
-		}
-		
-		if(!deeplink.proxies.constants.Constants.getEnableLeadingSlash()) {
-			loginLocation = ensureNoStartingSlash(loginLocation);
 		}
 			
 		response.setStatus(IMxRuntimeResponse.SEE_OTHER);
@@ -170,7 +176,7 @@ public class ResponseHandler {
 			return null;
 		}
 		
-		if(!s.startsWith("/")) {
+		if(s.startsWith("/")) {
 			s = s.substring(1);
 		}
 		return s;

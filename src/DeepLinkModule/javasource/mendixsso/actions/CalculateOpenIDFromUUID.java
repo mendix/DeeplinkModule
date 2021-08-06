@@ -9,10 +9,10 @@
 
 package mendixsso.actions;
 
+import org.apache.commons.lang3.StringUtils;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
 import mendixsso.implementation.utils.OpenIDUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public class CalculateOpenIDFromUUID extends CustomJavaAction<java.lang.String>
 {
