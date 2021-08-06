@@ -44,7 +44,6 @@ public class DeeplinkUtils {
 		deeplink.proxies.Microflow microflowFromDeepLink = null;
 		
 		try {
-			microflowFromDeepLink = Microflows.dS_MicroflowByDeeplink(context, deeplink);
 			
 			deeplink.setAllowGuests(!forceLogin);
 			deeplink.setDescription(description);
@@ -54,6 +53,8 @@ public class DeeplinkUtils {
 			
 			deeplink.setObjectType(entity);
 			deeplink.setObjectAttribute(attribute);
+
+			microflowFromDeepLink = Microflows.dS_MicroflowByDeeplink(context, deeplink);
 			
 			deeplink.setUseObjectArgument(microflowFromDeepLink.getUseObjectArgument());
 			deeplink.setUseStringArgument(microflowFromDeepLink.getUseStringArg());

@@ -42,7 +42,7 @@ public class GetAttributeValueByEntityName extends CustomJavaAction<java.lang.St
 
 		}
 		catch (Exception e) {
-			Core.getLogger(deeplink.implementation.Commons.logNodeName).error("Unable to retrieve a random object for entity: " + e.getMessage());
+			Core.getLogger(deeplink.implementation.Commons.logNodeName).warn("Unable to retrieve a random object for entity '" + Entity + "'");
 			throw(e);
 		}
 		// END USER CODE

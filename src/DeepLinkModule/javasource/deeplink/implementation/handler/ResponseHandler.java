@@ -5,6 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.rmi.UnexpectedException;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.mendix.core.Core;
 import com.mendix.logging.ILogNode;
 import com.mendix.m2ee.api.IMxRuntimeRequest;
@@ -90,9 +92,21 @@ public class ResponseHandler {
 	public static void serveLogin(IMxRuntimeRequest request,IMxRuntimeResponse response) throws UnsupportedEncodingException {
 	
 		String loginLocation = LOGINPAGE;
-		String requestURL = request.getHttpServletRequest().getRequestURL().toString();
+		HttpServletRequest servletRequest = request.getHttpServletRequest();
+		
+		String requestURL = servletRequest.getRequestURL().toString();
+
+		String scheme = servletRequest.getScheme();
+		String serverName = servletRequest.getServerName();
+		int port = servletRequest.getServerPort();
+		
 		String requestPathInfo= request.getHttpServletRequest().getPathInfo();
-		String requesthost = requestURL.substring(0,requestURL.indexOf(requestPathInfo));
+		StringBuilder host = new StringBuilder(scheme)
+				.append("://")
+				.append(serverName)
+				.append(":")
+				.append(port);
+		
 		
 		String queryString = request.getHttpServletRequest().getQueryString();
 		
@@ -105,7 +119,7 @@ public class ResponseHandler {
 				
 				if(loginLocation.startsWith("http") && !requestURL.startsWith(loginLocation)) {
 					
-					continuationURL += requesthost; 
+					continuationURL += host.toString(); 
 					
 					//external location, make sure continuation routes via SSOHandler.
 					if(SSOHANDLER!=null && SSOHANDLER.length()>0 && !loginLocation.startsWith(SSOHANDLER)) {
