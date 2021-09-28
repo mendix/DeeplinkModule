@@ -11,12 +11,11 @@ package deeplink.actions;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import com.mendix.core.Core;
 import com.mendix.core.CoreException;
-import com.mendix.core.actionmanagement.MicroflowCallBuilder;
 import com.mendix.logging.ILogNode;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IDataType;
@@ -24,6 +23,7 @@ import com.mendix.systemwideinterfaces.core.IFeedback.MessageType;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 import com.mendix.webui.CustomJavaAction;
 import com.mendix.webui.FeedbackHelper;
+import deeplink.implementation.handler.DeeplinkExecutionHandler;
 import deeplink.proxies.DeepLink;
 
 /**
@@ -48,6 +48,9 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 		this.pendinglink = __pendinglink == null ? null : deeplink.proxies.PendingLink.initialize(getContext(), __pendinglink);
 
 		// BEGIN USER CODE
+		
+		HashMap<String,Object> mfInputParameterValues = new HashMap();
+		
 		try {
 			if (this.pendinglink == null) {
 				LOG.warn("Pending link not found");
@@ -61,86 +64,52 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 				return false;
 			}
 
-			IMendixObject arg = null;
+			Map<String, IDataType> mfParams = Core.getInputParameters(link.getMicroflow());
+			
+			//Configured deeplink expects a Mendix object
 			if (!link.getUseStringArgument() && link.getObjectType() != null && !link.getObjectType().isEmpty())
 			{
 				try {
-					arg = Core.retrieveId(getContext(), Core.createMendixIdentifier(this.pendinglink.getArgument()));
+					IMendixObject mxObject = Core.retrieveId(getContext(), Core.createMendixIdentifier(this.pendinglink.getArgument()));
+					if(mxObject!=null) {
+						Map.Entry<String,IDataType> entry = mfParams.entrySet().iterator().next();
+						mfInputParameterValues.put(entry.getKey().toString(), mxObject);
+					}
+					else {
+						FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.WARNING, "DeepLink failed to load link, since the object with ID " + this.pendinglink.getArgument() + " no longer exists or the user has no access to read the object", false);
+					}
 				} catch (CoreException e) {
 					LOG.warn("Unable to retrieve " + this.pendinglink.getArgument(), e);
 				}
-				if (arg == null)
-				{
-				    FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.WARNING, "DeepLink failed to load link, since the object with ID " + this.pendinglink.getArgument() + " no longer exists or the user has no access to read the object", false);
-					return false;
-				}
 			}
+			//Now collect all query string parameters from persisted string argument
+			String allArguments = this.pendinglink.getStringArgument();
+			if(allArguments != null) {
+	            allArguments = URLDecoder.decode(allArguments, StandardCharsets.UTF_8.toString());
+           
+	            if(allArguments.contains("?") && allArguments.contains("=")) {
+	        		String[] arguments = allArguments.substring(allArguments.indexOf("?")+1).split("&");
+	        		
+	            	for (String argument : arguments) {
+	            		processArgument(argument, mfParams, mfInputParameterValues);
+	            	}
+	    		}
 
+	            if(mfInputParameterValues.size() == 0 && mfParams.size() == 1) {
+	            	Map.Entry<String,IDataType> entry = mfParams.entrySet().iterator().next();
+            		mfInputParameterValues.put(entry.getKey(), allArguments);
+            	}
+			}
+            
 			//invoke the microflow
 			try {
-				//object argument
-				if (arg != null) {
-					List<String> attributes = Core.getInputParameters(link.getMicroflow()).entrySet()
-							.stream()
-							.filter(entry -> link.getObjectType().equals(entry.getValue().getObjectType()))
-							.map(Entry::getKey).collect(Collectors.toList());
-
-					MicroflowCallBuilder microflowCallBuilder = Core.microflowCall(link.getMicroflow());
-
-					if (attributes.size() > 0) {
-						microflowCallBuilder = microflowCallBuilder.withParam(attributes.get(0), arg);
-					}
-
-					if (attributes.size() > 1) {
-						LOG.warn("2 parameters of the same type were found. We will use the first one.");
-					}
-
-					microflowCallBuilder.inTransaction(true).execute(getContext());
-				//string argument
-                } else if (link.getUseStringArgument()) {
-                    
-                	Map<String, IDataType> mfParams = Core.getInputParameters(link.getMicroflow());
-                	Map<String, Object> inputParameterValues = new HashMap<>();
-
-                    String allArguments = this.pendinglink.getStringArgument();
-                    allArguments = URLDecoder.decode(allArguments, StandardCharsets.UTF_8.toString());
-                    
-                    if (mfParams.size() == 1) {
-                    	Map.Entry<String,IDataType> entry = mfParams.entrySet().iterator().next();
-                    	IDataType parameterDataType = entry.getValue();
-                    	if (parameterDataType.getType() == IDataType.DataTypeEnum.String) {
-                    		if ((allArguments.contains(entry.getKey()+"=") || allArguments.contains(entry.getKey().toLowerCase()+"="))) {
-                    			inputParameterValues.put(entry.getKey(), allArguments.split("=")[1]);
-                    		}
-                    		else {
-                    			inputParameterValues.put(entry.getKey(), allArguments);
-                    		}
-                    	}
-                    }
-                    else if(mfParams.size()>1) {
-                    	if(allArguments.contains("?") && allArguments.contains("=")) {
-                    		String[] arguments = allArguments.substring(allArguments.indexOf("?")+1).split("&");
-                    		for (String argument : arguments) {
-                    			processArgument(argument, mfParams, inputParameterValues);
-                    		}
-                		}
-                    	else {
-                    		Map.Entry<String,IDataType> entry = mfParams.entrySet().iterator().next();
-                    		inputParameterValues.put(entry.getKey(), allArguments);
-                    	}
-                    }
-
-					Core.microflowCall(link.getMicroflow()).withParams(inputParameterValues).execute(getContext());
-                } else { //no argument
-					Core.microflowCall(link.getMicroflow()).execute(getContext());
-				}
+				DeeplinkExecutionHandler.execute(getContext(), link.getMicroflow(), mfInputParameterValues);
 
 			} catch (Exception e) {
 			    FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.WARNING, "Failed to execute microflow for deeplink " + link.getName() + ", check the log for details", false);
 			    LOG.error("Failed to execute deeplink " + link.getName(), e);
 				return false;
 			}
-
 
 			//remove the pendinglink, unless it should be reused during this session..
 			if (link.getUseAsHome()) { //do not remove if used as home.

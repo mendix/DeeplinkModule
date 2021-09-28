@@ -17,6 +17,7 @@ import com.mendix.systemwideinterfaces.core.ISession;
 import deeplink.proxies.DeepLink;
 import deeplink.proxies.PendingLink;
 import deeplink.proxies.constants.Constants;
+import deeplink.implementation.handler.helpers.DeeplinkRequest;
 
 public class DeeplinkHandler extends RequestHandler {
 
@@ -142,7 +143,7 @@ public class DeeplinkHandler extends RequestHandler {
 		
 	}
 	
-	private IMendixObject getObjectByRequestParameters(IContext context, DeepLink deepLinkConfigurationObject, DeeplinkRequest deeplinkRequest) {
+	protected IMendixObject getObjectByRequestParameters(IContext context, DeepLink deepLinkConfigurationObject, DeeplinkRequest deeplinkRequest) {
 		List<IMendixObject> parameterObjectList = Core
 				.createXPathQuery(String.format("//%s[%s=$value]", 
 						deepLinkConfigurationObject.getObjectType(),
@@ -175,7 +176,7 @@ public class DeeplinkHandler extends RequestHandler {
 		Core.delete(systemContext, pendinglinks);
 	}
 
-	private DeepLink getDeepLinkConfigurationObject(IContext context, String deeplinkName) {
+	protected DeepLink getDeepLinkConfigurationObject(IContext context, String deeplinkName) {
 		
 		List<IMendixObject> mendixObjList = Core.createXPathQuery(String.format("//%s[%s=$value]",
 					DeepLink.getType(),
@@ -195,59 +196,4 @@ public class DeeplinkHandler extends RequestHandler {
 			return DeepLink.initialize(context, mendixObjList.get(0));
 		}
 	}
-}
-
-class DeeplinkRequest {
-	
-	private String _deeplinkName = null;
-
-	private String _path = null;
-	private String _pathArgument = null;
-	private String _queryString = null;
-	
-	public DeeplinkRequest(IMxRuntimeRequest request) {
-		
-		String path = request.getResourcePath().replaceFirst("/" + Constants.getRequestHandlerName() +"/", "");
-		String querystring = request.getHttpServletRequest().getQueryString();
-		
-		if(querystring != null && querystring.contains("sso_callback=true")) {
-			querystring = querystring.replaceAll("&sso_callback=true", "");
-			querystring = querystring.replaceAll("sso_callback=true", "");
-		}
-		
-		List<String> splitted_path = new LinkedList<String>(Arrays.asList(path.split("/")));		
-		
-		this._deeplinkName = splitted_path.get(0);
-		splitted_path.remove(0);
-		
-		if(splitted_path.size()>=1) {
-			this._pathArgument = splitted_path.get(0);
-		}
-
-		this._path = String.join("/", splitted_path);  
-		
-		if(querystring!=null && querystring.length()>0) {
-			this._path += "?" + querystring;
-		}
-		
-		this._queryString = querystring != null ? querystring : "";
-		
-	}
-	
-	public String getDeeplinkName() {
-		return this._deeplinkName;
-	}
-	
-	public String getQueryString() {
-		return this._queryString;
-	}
-	
-	public String getPath() {
-		return this._path;
-	}
-	
-	public String getPathArgument() {
-		return this._pathArgument;
-	}
-	
 }
