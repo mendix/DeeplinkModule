@@ -47,7 +47,9 @@ public class ResponseHandler {
 			location = "/" + location;
 		}
 		
-		LOG.trace("Redirecting to index location: " + location );
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Redirecting to index location: " + location );
+		}
 		response.addHeader("location", location);
 	}
 	

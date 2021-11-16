@@ -1,7 +1,5 @@
 package deeplink.implementation.handler;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.mendix.core.Core;
@@ -16,7 +14,6 @@ import com.mendix.systemwideinterfaces.core.ISession;
 
 import deeplink.proxies.DeepLink;
 import deeplink.proxies.PendingLink;
-import deeplink.proxies.constants.Constants;
 import deeplink.implementation.handler.helpers.DeeplinkRequest;
 
 public class DeeplinkHandler extends RequestHandler {
@@ -60,7 +57,9 @@ public class DeeplinkHandler extends RequestHandler {
 				
 				if(deepLinkConfigurationObject != null) {
 					
-					LOG.trace(String.format("Handling deeplink with existing session(%s)",session.getId()));
+					if(LOG.isTraceEnabled()) {
+						LOG.trace(String.format("Handling deeplink with existing session(%s)", session.getId()));
+					}
 					
 					/* anonymous users are not immediately forwarded to index when
 						- deeplink does not allow anonymous users
@@ -119,20 +118,24 @@ public class DeeplinkHandler extends RequestHandler {
 				
 			}
 			else {
-				LOG.trace(String.format("The deeplink '%s' accepts the object '%s' as an argument, "
-						+ "but an object with value '%s' for attribute '%s' wasn't found "
-						+ "in the database",
-						deepLinkConfigurationObject.getName(),
-						deepLinkConfigurationObject.getObjectType(),
-						deepLinkRequest.getPath(),
-						deepLinkConfigurationObject.getObjectAttribute()
-						));
+				if(LOG.isTraceEnabled()) {
+					LOG.trace(String.format("The deeplink '%s' accepts the object '%s' as an argument, "
+							+ "but an object with value '%s' for attribute '%s' wasn't found "
+							+ "in the database",
+							deepLinkConfigurationObject.getName(),
+							deepLinkConfigurationObject.getObjectType(),
+							deepLinkRequest.getPath(),
+							deepLinkConfigurationObject.getObjectAttribute()
+							));
+				}
 				return null;
 			}
 		}
 		
 		try {
-			LOG.trace(String.format("Created new pending link for session(%s) and user(%s)", session.getId(), session.getUserName()));
+			if(LOG.isTraceEnabled()) {
+				LOG.trace(String.format("Created new pending link for session(%s) and user(%s)", session.getId(), session.getUserName()));
+			}
 			Core.commit(context, newPendingLink.getMendixObject());
 		} catch (CoreException e) {
 			LOG.error(e);
@@ -185,10 +188,12 @@ public class DeeplinkHandler extends RequestHandler {
 				.execute(context);
 		
 		if (mendixObjList.size() != 1) {
-			LOG.debug(String.format("Input parameter '%s' is configured %d %s in the deeplink configuration.",
-					deeplinkName,
-					mendixObjList.size(),
-					mendixObjList.size() == 0 ? "time": "times"));
+			if(LOG.isDebugEnabled()) {
+				LOG.debug(String.format("Input parameter '%s' is configured %d %s in the deeplink configuration.",
+						deeplinkName,
+						mendixObjList.size(),
+						mendixObjList.size() == 0 ? "time": "times"));
+			}
 
 			return null;
 		}

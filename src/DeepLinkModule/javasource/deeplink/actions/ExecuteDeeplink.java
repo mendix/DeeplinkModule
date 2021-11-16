@@ -169,7 +169,9 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 		        value = args.get(key) + "-" + value;
 		    }
 		    args.put(key, value);
-		    LOG.trace("Adding parameter: " + key + " and value: " + value );
+		    if(LOG.isTraceEnabled()) {
+		    	LOG.trace("Adding parameter: " + key + " and value: " + value );
+		    }
 		} else { //Fallback to check the parameter case insensitive
 			boolean paramMatched = false;
 			for( Entry<String,IDataType> param : params.entrySet() ) {
@@ -180,7 +182,9 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 					}
 				    args.put(param.getKey(), value);
 
-				    LOG.trace("Adding parameter: " + param.getKey() + " from key: " + key + " and value: " + value );
+				    if(LOG.isTraceEnabled()) {
+				    	LOG.trace("Adding parameter: " + param.getKey() + " from key: " + key + " and value: " + value );
+				    }
 
 					paramMatched = true;
 					break;

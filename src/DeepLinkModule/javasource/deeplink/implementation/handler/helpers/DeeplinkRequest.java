@@ -1,7 +1,7 @@
 package deeplink.implementation.handler.helpers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.mendix.m2ee.api.IMxRuntimeRequest;
@@ -26,7 +26,7 @@ public class DeeplinkRequest {
 			querystring = querystring.replaceAll("sso_callback=true", "");
 		}
 		
-		List<String> splitted_path = new LinkedList<String>(Arrays.asList(path.split("/")));		
+		List<String> splitted_path = new ArrayList<String>(Arrays.asList(path.split("/")));		
 		
 		this._deeplinkName = splitted_path.get(0);
 		splitted_path.remove(0);
