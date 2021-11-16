@@ -73,7 +73,6 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 			boolean stringarg = false;
 			boolean objectarg = false;
 			boolean applicableForDeeplink = true;
-			StringBuilder argumentExample = new StringBuilder();
 			
 			for (Entry<String, IDataType> entry : args.entrySet()) {
 				hasarg = true;
@@ -81,14 +80,17 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
                 
 				//Special case, string type argument
 				if (type.getType() == DataTypeEnum.String) {
-					argumentExample.append(entry.getKey()).append("=YourValue&");
 					stringarg = true;
 				} else if( type.getType() == DataTypeEnum.Object ) {
-					IMendixObject mo = StartDeeplinkJava.query(
-					        c, Entity.getType(), Entity.MemberNames.Name, type.getObjectType());
-                    argumentExample = new StringBuilder("YourValue&");
-                    if (mo != null) {
-                        datatype = mo;
+					List<IMendixObject> microflowList = Core.createXPathQuery(
+							String.format("//%s[%s=$value]", 
+								Entity.getType(),
+								Entity.MemberNames.Name))
+							.setVariable("value", type.getObjectType())
+							.execute(c);
+
+                    if (microflowList.size() > 0) {
+                        datatype = microflowList.get(0);
                         stringarg = false;
                         objectarg = true;
                     }
@@ -107,9 +109,8 @@ public class ReadMicroflows extends CustomJavaAction<java.lang.Boolean>
 			Microflow flow = Microflow.initialize(c, Core.instantiate(c, Microflow.entityName));
 			flow.setName(mf);
 			flow.setModule(mf.substring(0,mf.indexOf('.')));
+			flow.setFriendlyName(mf.substring(mf.indexOf('.')+1));
 			
-			if( !"".equals(argumentExample.toString()) )
-				flow.setArgumentExample((stringarg?"?":"/") + argumentExample.substring(0,argumentExample.length()-1));
 			if (datatype != null)
 				flow.setparam(Entity.initialize(c, datatype));
 			if (stringarg)
