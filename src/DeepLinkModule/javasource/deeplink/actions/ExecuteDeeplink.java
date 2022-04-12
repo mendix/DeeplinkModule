@@ -27,7 +27,7 @@ import deeplink.implementation.handler.DeeplinkExecutionHandler;
 import deeplink.proxies.DeepLink;
 
 /**
- * Executes a Pendlinglink, i.e. executes the corressponding microflow.
+ * Executes a Pendinglink, i.e. executes the corresponding microflow.
  * Returns true if a link was executed, false otherwise.
  * If this action returns true, no further actions should be taken in the current context.
  */

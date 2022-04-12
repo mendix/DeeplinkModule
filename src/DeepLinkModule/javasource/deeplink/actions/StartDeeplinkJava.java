@@ -14,7 +14,7 @@ import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
 
 /**
- * Starts the deeplink modle. Initializes the "/link/" request handler.
+ * Starts the deeplink model. Initializes the "/link/" request handler.
  * 
  * Returns true (always)
  */
