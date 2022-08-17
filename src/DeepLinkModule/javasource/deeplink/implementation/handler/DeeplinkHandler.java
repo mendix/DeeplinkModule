@@ -24,6 +24,23 @@ public class DeeplinkHandler extends RequestHandler {
 	@Override
 	protected void processRequest(IMxRuntimeRequest request, IMxRuntimeResponse response, String path) throws Exception {
 		
+		/** BJHL - CC0000000100277
+         * Office (esp. Word) opens links by fetching the URL using its own cookies, following 
+         * any redirects and opening the resulting location in a browser. The browser will then
+         * send its cookies, which ultimately results in a session mismatch between word and
+         * the browser, causing the pending deeplink to be created for the wrong session. This
+         * is a know problem with word: 
+         *   https://stackoverflow.com/questions/1421608/how-does-ms-word-open-a-hyperlink
+         * To "fix" this, ignore any requests where the user-agent contains "office". Sending
+         * a 200 OK tells word the end of the redirect is reached, and it will happily open the 
+         * original URL in your default browser... 
+         */
+        if (request.getHeader("User-Agent").toLowerCase().contains("office")) {
+            response.setStatus(IMxRuntimeResponse.OK);
+            return;
+        }
+		
+		
 		final DeeplinkRequest deepLinkRequest = new DeeplinkRequest(request);
 
 		ISession session = null;
