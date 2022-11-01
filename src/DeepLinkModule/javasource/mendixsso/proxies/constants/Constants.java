@@ -66,11 +66,6 @@ public class Constants
 		return (java.lang.String)Core.getConfiguration().getConstantValue("MendixSSO.LogNode");
 	}
 
-	public static java.lang.String getMxID2_OpenIDPrefix()
-	{
-		return (java.lang.String)Core.getConfiguration().getConstantValue("MendixSSO.MxID2_OpenIDPrefix");
-	}
-
 	public static java.lang.String getOpenIdConnectDiscoveryPath()
 	{
 		return (java.lang.String)Core.getConfiguration().getConstantValue("MendixSSO.OpenIdConnectDiscoveryPath");
@@ -89,6 +84,16 @@ public class Constants
 	public static java.lang.String getRolesLocation()
 	{
 		return (java.lang.String)Core.getConfiguration().getConstantValue("MendixSSO.RolesLocation");
+	}
+
+	public static java.lang.String getSignupHint()
+	{
+		return (java.lang.String)Core.getConfiguration().getConstantValue("MendixSSO.SignupHint");
+	}
+
+	public static boolean getSilentAuthentication()
+	{
+		return (java.lang.Boolean)Core.getConfiguration().getConstantValue("MendixSSO.SilentAuthentication");
 	}
 
 	/**

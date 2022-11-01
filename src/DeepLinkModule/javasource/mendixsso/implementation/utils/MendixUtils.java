@@ -10,6 +10,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +54,61 @@ public final class MendixUtils {
 
         final List<IMendixObject> results = query.execute(context);
         return mendixObjectListToProxyObjectList(context, results, cls);
+    }
+
+    public static <T> List<T> retrieveFromDatabase(final IContext context,
+                                                   final Class<T> cls,
+                                                   final int amount, final int offset,
+                                                   final Map<String, Boolean> sorting,
+                                                   final int depth,
+                                                   final String xPathExpr,
+                                                   final Map<String, Object> xPathVariables,
+                                                   final Object... xPathArgs) {
+
+        final XPathBasicQuery query = Core.createXPathQuery(String.format(xPathExpr, xPathArgs));
+        query.setAmount(amount);
+        query.setOffset(offset);
+        query.setDepth(depth);
+
+        if (xPathVariables != null && !xPathVariables.isEmpty()) {
+            for (Map.Entry<String, Object> variable : xPathVariables.entrySet()) {
+                setXPathQueryVariable(query, variable.getKey(), variable.getValue());
+            }
+        }
+
+        if (sorting != null && !sorting.isEmpty()) {
+            for (Map.Entry<String, Boolean> sortingEntry : sorting.entrySet()) {
+                query.addSort(sortingEntry.getKey(), sortingEntry.getValue());
+            }
+        }
+
+        final List<IMendixObject> results = query.execute(context);
+        return mendixObjectListToProxyObjectList(context, results, cls);
+    }
+
+    private static void setXPathQueryVariable(final XPathBasicQuery query, final String key, final Object val) {
+
+        if (val instanceof BigDecimal) {
+            query.setVariable(key, (BigDecimal) val);
+        } else if (val instanceof Boolean) {
+            query.setVariable(key, (boolean) val);
+        } else if (val instanceof Double) {
+            query.setVariable(key, (double) val);
+        } else if (val instanceof Integer) {
+            query.setVariable(key, (int) val);
+        } else if (val instanceof Long) {
+            query.setVariable(key, (long) val);
+        } else if (val instanceof Date) {
+            query.setVariable(key, ((Date) val).getTime());
+        } else if (val instanceof IMendixObject) {
+            query.setVariable(key, (IMendixObject) val);
+        } else if (val instanceof IMendixIdentifier) {
+            query.setVariable(key, (IMendixIdentifier) val);
+        } else if (val instanceof String) {
+            query.setVariable(key, val.toString());
+        } else {
+            throw new RuntimeException("Unsupported variable type: " + val.getClass().getCanonicalName() + " provided for key: " + key);
+        }
     }
 
     public static <T> T retrieveSingleObjectFromDatabase(final IContext context, final Class<T> cls, final String xPathExpr,

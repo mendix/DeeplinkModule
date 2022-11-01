@@ -23,11 +23,11 @@ public class MendixSSOConfigurationView
 		SSOEnabled("SSOEnabled"),
 		SilentAuthentication("SilentAuthentication"),
 		DefaultRequestScopes("DefaultRequestScopes"),
-		AdditionalRequestScopes("AdditionalRequestScopes"),
 		EnvironmentUUID("EnvironmentUUID"),
 		EnvironmentPassword("EnvironmentPassword"),
 		OpenIdConnectProvider("OpenIdConnectProvider"),
-		RolesLocation("RolesLocation");
+		RolesLocation("RolesLocation"),
+		SignupHint("SignupHint");
 
 		private java.lang.String metaName;
 
@@ -223,42 +223,6 @@ public class MendixSSOConfigurationView
 	}
 
 	/**
-	 * @return value of AdditionalRequestScopes
-	 */
-	public final java.lang.String getAdditionalRequestScopes()
-	{
-		return getAdditionalRequestScopes(getContext());
-	}
-
-	/**
-	 * @param context
-	 * @return value of AdditionalRequestScopes
-	 */
-	public final java.lang.String getAdditionalRequestScopes(com.mendix.systemwideinterfaces.core.IContext context)
-	{
-		return (java.lang.String) getMendixObject().getValue(context, MemberNames.AdditionalRequestScopes.toString());
-	}
-
-	/**
-	 * Set value of AdditionalRequestScopes
-	 * @param additionalrequestscopes
-	 */
-	public final void setAdditionalRequestScopes(java.lang.String additionalrequestscopes)
-	{
-		setAdditionalRequestScopes(getContext(), additionalrequestscopes);
-	}
-
-	/**
-	 * Set value of AdditionalRequestScopes
-	 * @param context
-	 * @param additionalrequestscopes
-	 */
-	public final void setAdditionalRequestScopes(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String additionalrequestscopes)
-	{
-		getMendixObject().setValue(context, MemberNames.AdditionalRequestScopes.toString(), additionalrequestscopes);
-	}
-
-	/**
 	 * @return value of EnvironmentUUID
 	 */
 	public final java.lang.String getEnvironmentUUID()
@@ -400,6 +364,42 @@ public class MendixSSOConfigurationView
 	public final void setRolesLocation(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String roleslocation)
 	{
 		getMendixObject().setValue(context, MemberNames.RolesLocation.toString(), roleslocation);
+	}
+
+	/**
+	 * @return value of SignupHint
+	 */
+	public final java.lang.String getSignupHint()
+	{
+		return getSignupHint(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of SignupHint
+	 */
+	public final java.lang.String getSignupHint(com.mendix.systemwideinterfaces.core.IContext context)
+	{
+		return (java.lang.String) getMendixObject().getValue(context, MemberNames.SignupHint.toString());
+	}
+
+	/**
+	 * Set value of SignupHint
+	 * @param signuphint
+	 */
+	public final void setSignupHint(java.lang.String signuphint)
+	{
+		setSignupHint(getContext(), signuphint);
+	}
+
+	/**
+	 * Set value of SignupHint
+	 * @param context
+	 * @param signuphint
+	 */
+	public final void setSignupHint(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String signuphint)
+	{
+		getMendixObject().setValue(context, MemberNames.SignupHint.toString(), signuphint);
 	}
 
 	/**

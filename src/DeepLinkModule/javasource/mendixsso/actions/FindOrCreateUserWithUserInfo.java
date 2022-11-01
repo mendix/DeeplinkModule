@@ -49,6 +49,7 @@ public class FindOrCreateUserWithUserInfo extends CustomJavaAction<IMendixObject
             user = UserManager.findOrCreateUser(userProfile).getMendixObject();
         } catch (Throwable e) {
             LOG.error("Something went wrong while provisioning the user with the provided user info", e);
+			Thread.currentThread().interrupt();
         } finally {
             if (uuid != null) {
                 ForeignIdentityUtils.unlockForeignIdentity(uuid);

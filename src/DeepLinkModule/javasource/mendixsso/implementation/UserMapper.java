@@ -8,8 +8,6 @@ import mendixsso.implementation.utils.UserMapperMicroflowsValidator;
 import mendixsso.proxies.UserProfile;
 import system.proxies.User;
 
-import java.util.HashMap;
-
 public class UserMapper {
 
     private static UserMapper instance = null;
@@ -32,7 +30,8 @@ public class UserMapper {
         this.updateUserMicroflowName = updateUserMicroflowName;
 
         // Validator throws MendixRuntimeException when validation fails
-        this.userEntityType = UserMapperMicroflowsValidator.validateMicroflows(createUserMicroflowName, updateUserMicroflowName);
+        this.userEntityType = UserMapperMicroflowsValidator
+            .validateMicroflows(createUserMicroflowName, updateUserMicroflowName);
     }
 
     public boolean isCompatibleUserType(User user) {
@@ -49,16 +48,16 @@ public class UserMapper {
 
     IMendixObject createUser(IContext context, UserProfile userProfile, String uuid) throws CoreException {
         return Core.microflowCall(this.createUserMicroflowName)
-                .withParam("UserProfile", userProfile.getMendixObject())
-                .withParam("UUID", uuid)
-                .execute(context);
+            .withParam("UserProfile", userProfile.getMendixObject())
+            .withParam("UUID", uuid)
+            .execute(context);
     }
 
     void updateUser(IContext context, User user, UserProfile userProfile, String uuid) throws CoreException {
         Core.microflowCall(this.updateUserMicroflowName)
-                .withParam("User", user.getMendixObject())
-                .withParam("UserProfile", userProfile.getMendixObject())
-                .withParam("UUID", uuid)
-                .execute(context);
+            .withParam("User", user.getMendixObject())
+            .withParam("UserProfile", userProfile.getMendixObject())
+            .withParam("UUID", uuid)
+            .execute(context);
     }
 }

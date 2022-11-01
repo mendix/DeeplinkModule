@@ -10,8 +10,8 @@ import java.util.UUID;
 
 class TemplateVariables {
 
-    static final String CACHE_BUST_UUID_KEY = "{{__MX_CACHE_BUST__}}";
-    static final String CACHE_BUST_UUID_VALUE = UUID.randomUUID().toString();
+    public static final String CACHE_BUST_UUID_KEY = "{{__MX_CACHE_BUST__}}";
+    public static final String CACHE_BUST_UUID_VALUE = UUID.randomUUID().toString();
     private final Map<String, String> parameters = new HashMap<>();
 
     public void putString(String key, String value) {

@@ -12,9 +12,10 @@ package mendixsso.actions;
 import com.mendix.systemwideinterfaces.MendixRuntimeException;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Base64;
 
 public class EncryptString extends CustomJavaAction<java.lang.String>
 {
@@ -34,24 +35,30 @@ public class EncryptString extends CustomJavaAction<java.lang.String>
 	public java.lang.String executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-        if (this.value == null)
-            return null;
-        if (this.prefix == null || this.prefix.isEmpty())
-            throw new MendixRuntimeException("Prefix should not be empty");
-        if (this.key == null || this.key.isEmpty())
-            throw new MendixRuntimeException("Key should not be empty");
-        if (this.key.length() != 16)
-            throw new MendixRuntimeException("Key length should be 16");
-        Cipher c = Cipher.getInstance("AES/GCM/PKCS5PADDING");
-        SecretKeySpec k = new SecretKeySpec(this.key.getBytes(), "AES");
-        c.init(Cipher.ENCRYPT_MODE, k);
+    if (this.value == null) {
+      return null;
+    }
+    if (this.prefix == null || this.prefix.isEmpty()) {
+      throw new MendixRuntimeException("Prefix should not be empty");
+    }
+    if (this.key == null || this.key.isEmpty()) {
+      throw new MendixRuntimeException("Key should not be empty");
+    }
+    if (this.key.length() != getKeyLength()) {
+      throw new MendixRuntimeException("Key length should be 16");
+    }
+    Cipher c = Cipher.getInstance("AES/GCM/PKCS5PADDING");
+    SecretKeySpec k = new SecretKeySpec(this.key.getBytes(), "AES");
+    c.init(Cipher.ENCRYPT_MODE, k);
 
-        byte[] encryptedData = c.doFinal(this.value.getBytes());
-        byte[] iv = c.getIV();
+    byte[] encryptedData = c.doFinal(this.value.getBytes());
+    byte[] iv = c.getIV();
 
-        return new StringBuilder(this.prefix +
-                new String(Base64.getEncoder().encode(iv))).append(";").append(
-                new String(Base64.getEncoder().encode(encryptedData))).toString();
+    return new StringBuilder(
+            this.prefix + new String(Base64.getEncoder().encode(iv), StandardCharsets.UTF_8))
+        .append(";")
+        .append(new String(Base64.getEncoder().encode(encryptedData), StandardCharsets.UTF_8))
+        .toString();
 		// END USER CODE
 	}
 
@@ -65,5 +72,10 @@ public class EncryptString extends CustomJavaAction<java.lang.String>
 	}
 
 	// BEGIN EXTRA CODE
+  private static final int KEY_LENGTH = 16;
+
+  private static int getKeyLength() {
+    return KEY_LENGTH;
+  }
 	// END EXTRA CODE
 }

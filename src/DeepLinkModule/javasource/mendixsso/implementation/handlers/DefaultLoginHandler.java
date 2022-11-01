@@ -35,7 +35,7 @@ public class DefaultLoginHandler implements ILoginHandler {
         }
 
         try {
-            SessionManager.createSessionForUser(context, resp, req, user, oidcTokenResponse);
+            SessionManager.createSessionForUser(context, resp, user, oidcTokenResponse);
             OpenIDUtils.redirectToIndex(req, resp, continuation);
         } catch (ParseException e) {
             ErrorUtils.serveError(req, resp, ErrorUtils.ResponseType.INTERNAL_SERVER_ERROR, "Unexpected IdP server response: " + e.getMessage(), false, e);
