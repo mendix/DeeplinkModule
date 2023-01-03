@@ -26,8 +26,11 @@ public class SessionHandler {
 			Class[] methodSignature = {String.class, String.class, String.class, String.class, int.class, boolean.class, boolean.class};
 			Method addCookie = response.getClass().getMethod("addCookie", methodSignature);
 			addCookie.invoke(response, Core.getConfiguration().getSessionIdCookieName(), session.getId().toString(), "/", "", -1, true, true);
+			addCookie.invoke(response, XAS_ID, "0." + Core.getXASId(),"/", "", -1, true, true);
+
 		} else {
 			response.addCookie(Core.getConfiguration().getSessionIdCookieName(), session.getId().toString(), "/", "", -1, true);
+			response.addCookie(XAS_ID, "0." + Core.getXASId(),"/", "", -1, true);
 		}
 	}
 
