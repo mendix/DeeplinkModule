@@ -4,4 +4,4 @@ Please see [Deep Link](https://docs.mendix.com/appstore/modules/deep-link) in th
 
 ## Issue reporting
 
-If you encounter any problems the module please submit a request through our Support Team https://support.mendix.com
+If you encounter any problems with the module please submit a request through our Support Team https://support.mendix.com
