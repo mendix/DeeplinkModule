@@ -45,7 +45,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 	@java.lang.Override
 	public java.lang.Boolean executeAction() throws Exception
 	{
-		this.pendinglink = __pendinglink == null ? null : deeplink.proxies.PendingLink.initialize(getContext(), __pendinglink);
+		this.pendinglink = this.__pendinglink == null ? null : deeplink.proxies.PendingLink.initialize(getContext(), __pendinglink);
 
 		// BEGIN USER CODE
 		
@@ -120,10 +120,12 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 				Core.delete(this.getContext(), this.pendinglink.getMendixObject());
 			}
 
-			//set hitcount (note, this might not be exact)
-			IContext sudoContext = getContext().createSudoClone();
-			link.setHitCount(sudoContext, link.getHitCount(getContext().createSudoClone()) + 1);
-			Core.commit(sudoContext, link.getMendixObject());
+			if(link.getTrackHitCount()) {
+				//set hitcount (note, this might not be exact)
+				IContext sudoContext = getContext().createSudoClone();
+				link.setHitCount(sudoContext, link.getHitCount(getContext().createSudoClone()) + 1);
+				Core.commit(sudoContext, link.getMendixObject());
+			}
 
 			return true;
 		}
@@ -138,6 +140,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 
 	/**
 	 * Returns a string representation of this action
+	 * @return a string representation of this action
 	 */
 	@java.lang.Override
 	public java.lang.String toString()
