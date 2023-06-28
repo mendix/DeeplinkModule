@@ -85,13 +85,16 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 			//Now collect all query string parameters from persisted string argument
 			String allArguments = this.pendinglink.getStringArgument();
 			if(allArguments != null) {
-	            allArguments = URLDecoder.decode(allArguments, StandardCharsets.UTF_8.toString());
-           
+
 	            if(allArguments.contains("?") && allArguments.contains("=")) {
-	        		String[] arguments = allArguments.substring(allArguments.indexOf("?")+1).split("&");
-	        		
-	            	for (String argument : arguments) {
-	            		processArgument(argument, mfParams, mfInputParameterValues);
+	        		String[] arguments = allArguments
+							.substring(allArguments.indexOf("?") + 1)
+							.split("&");
+
+					String UTF_8 = StandardCharsets.UTF_8.toString();
+					for (String argument : arguments) {
+						var decodedArgument = URLDecoder.decode(argument, UTF_8);
+	            		processArgument(decodedArgument, mfParams, mfInputParameterValues);
 	            	}
 	    		}
 
