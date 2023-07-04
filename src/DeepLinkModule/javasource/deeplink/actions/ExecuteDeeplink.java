@@ -50,7 +50,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 		// BEGIN USER CODE
 		
 		HashMap<String,Object> mfInputParameterValues = new HashMap();
-		
+
 		try {
 			if (this.pendinglink == null) {
 				LOG.warn("Pending link not found");
@@ -65,7 +65,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 			}
 
 			Map<String, IDataType> mfParams = Core.getInputParameters(link.getMicroflow());
-			
+
 			//Configured deeplink expects a Mendix object
 			if (!link.getUseStringArgument() && link.getObjectType() != null && !link.getObjectType().isEmpty())
 			{
@@ -85,32 +85,31 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 			//Now collect all query string parameters from persisted string argument
 			String allArguments = this.pendinglink.getStringArgument();
 			if(allArguments != null) {
-
-	            if(allArguments.contains("?") && allArguments.contains("=")) {
-	        		String[] arguments = allArguments
+				if(allArguments.contains("?") && allArguments.contains("=")) {
+					String[] arguments = allArguments
 							.substring(allArguments.indexOf("?") + 1)
 							.split("&");
 
 					String UTF_8 = StandardCharsets.UTF_8.toString();
 					for (String argument : arguments) {
 						var decodedArgument = URLDecoder.decode(argument, UTF_8);
-	            		processArgument(decodedArgument, mfParams, mfInputParameterValues);
-	            	}
-	    		}
+						processArgument(decodedArgument, mfParams, mfInputParameterValues);
+					}
+				}
 
-	            if(mfInputParameterValues.size() == 0 && mfParams.size() == 1) {
-	            	Map.Entry<String,IDataType> entry = mfParams.entrySet().iterator().next();
-            		mfInputParameterValues.put(entry.getKey(), allArguments);
-            	}
+				if(mfInputParameterValues.size() == 0 && mfParams.size() == 1) {
+					Map.Entry<String,IDataType> entry = mfParams.entrySet().iterator().next();
+					mfInputParameterValues.put(entry.getKey(), allArguments);
+				}
 			}
-            
+
 			//invoke the microflow
 			try {
 				DeeplinkExecutionHandler.execute(getContext(), link.getMicroflow(), mfInputParameterValues);
 
 			} catch (Exception e) {
-			    FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.WARNING, "Failed to execute microflow for deeplink " + link.getName() + ", check the log for details", false);
-			    LOG.error("Failed to execute deeplink " + link.getName(), e);
+				FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.WARNING, "Failed to execute microflow for deeplink " + link.getName() + ", check the log for details", false);
+				LOG.error("Failed to execute deeplink " + link.getName(), e);
 				return false;
 			}
 
@@ -132,8 +131,8 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 		}
 		catch (Exception e)
 		{
-		    FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.ERROR, "General error while evaluating deeplink:\n" + e.getMessage(), true);
-		    LOG.error("General error while evaluating deeplink: " + e.getMessage(), e);
+			FeedbackHelper.addTextMessageFeedback(this.getContext(), MessageType.ERROR, "General error while evaluating deeplink:\n" + e.getMessage(), true);
+			LOG.error("General error while evaluating deeplink: " + e.getMessage(), e);
 			return false;
 		}
 		// END USER CODE
@@ -153,7 +152,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 	
 	private static void processArgument(String argument, Map<String, IDataType> params, Map<String, Object> args) {
 		// skip empty arguments
-	    if( "".equals(argument) )
+		if( "".equals(argument) )
 			return;
 
 		String key;
@@ -167,27 +166,27 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 		}
 
 		if( params.containsKey(key) ) {
-		    // if already exists (array get param), concat to end.
-		    if (args.containsKey(key)) {
-		        value = args.get(key) + "-" + value;
-		    }
-		    args.put(key, value);
-		    if(LOG.isTraceEnabled()) {
-		    	LOG.trace("Adding parameter: " + key + " and value: " + value );
-		    }
+			// if already exists (array get param), concat to end.
+			if (args.containsKey(key)) {
+				value = args.get(key) + "-" + value;
+			}
+			args.put(key, value);
+			if(LOG.isTraceEnabled()) {
+				LOG.trace("Adding parameter: " + key + " and value: " + value );
+			}
 		} else { //Fallback to check the parameter case insensitive
 			boolean paramMatched = false;
 			for( Entry<String,IDataType> param : params.entrySet() ) {
-			    String testKey = param.getKey();
+				String testKey = param.getKey();
 				if( testKey.equalsIgnoreCase(key) ) {
 					if (args.containsKey(testKey)) {
-					    value = args.get(testKey) + "-" + value;
+						value = args.get(testKey) + "-" + value;
 					}
-				    args.put(param.getKey(), value);
+					args.put(param.getKey(), value);
 
-				    if(LOG.isTraceEnabled()) {
-				    	LOG.trace("Adding parameter: " + param.getKey() + " from key: " + key + " and value: " + value );
-				    }
+					if(LOG.isTraceEnabled()) {
+						LOG.trace("Adding parameter: " + param.getKey() + " from key: " + key + " and value: " + value );
+					}
 
 					paramMatched = true;
 					break;
