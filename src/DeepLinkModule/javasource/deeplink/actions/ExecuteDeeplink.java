@@ -87,8 +87,8 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 			if(allArguments != null) {
 				if(allArguments.contains("?") && allArguments.contains("=")) {
 					String[] arguments = allArguments
-							.substring(allArguments.indexOf("?") + 1)
-							.split("&");
+						.substring(allArguments.indexOf("?") + 1)
+						.split("&");
 
 					String UTF_8 = StandardCharsets.UTF_8.toString();
 					for (String argument : arguments) {
