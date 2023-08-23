@@ -38,9 +38,7 @@ public class ResponseHandler {
 			location = INDEXPAGE;
 		}
 
-		if (!location.startsWith("/")) {
-			location = "/" + location;
-		}
+		location = getRootUrl() + ensureStartingSlash(location);
 
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Redirecting to index location: " + location);
@@ -79,6 +77,8 @@ public class ResponseHandler {
 				redirectLocation += URLEncoder.encode(pathinfo + querystring,
 						java.nio.charset.StandardCharsets.UTF_8.toString());
 			}
+
+			redirectLocation = getRootUrl() + ensureStartingSlash(redirectLocation);
 
 			response.setStatus(IMxRuntimeResponse.SEE_OTHER);
 			response.addHeader("location", redirectLocation);
@@ -139,12 +139,11 @@ public class ResponseHandler {
 		}
 
 		if (!loginLocation.startsWith("http")) {
-			loginLocation = ensureStartingSlash(loginLocation);
+			loginLocation = getRootUrl() + ensureStartingSlash(loginLocation);
 		}
 
 		response.setStatus(IMxRuntimeResponse.SEE_OTHER);
 		response.addHeader("location", loginLocation);
-
 	}
 
 	private static String ensureStartingSlash(String s) {
@@ -167,6 +166,15 @@ public class ResponseHandler {
 			s = s.substring(1);
 		}
 		return s;
+	}
+
+	private static String getRootUrl()
+	{
+		String url = Core.getConfiguration().getApplicationRootUrl();
+		String path = ensureStartingSlash(URI.create(url).getPath());
+		if(path.endsWith("/"))
+			return path.substring(0, path.length() - 1);
+		return path;
 	}
 
 }
