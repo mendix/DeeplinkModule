@@ -20,7 +20,10 @@ public class SessionHandler {
 
 	private static void setCookies(IMxRuntimeResponse response, ISession session) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		String[] mxVersion = RuntimeVersion.getInstance().toString().split("\\.");
-		if (Integer.parseInt(mxVersion[0]) >=9 && Integer.parseInt(mxVersion[1]) >= 20) {
+		int majorVersion = Integer.parseInt(mxVersion[0]);
+		int minorVersion = Integer.parseInt(mxVersion[1]);
+		
+		if ((majorVersion >= 9 && minorVersion >= 20) || majorVersion >= 10) {
 			// use reflection to call the addCookie method with the 7th parameter for 'isHostOnly', which was added in 9.20
 			@SuppressWarnings("rawtypes")
 			Class[] methodSignature = {String.class, String.class, String.class, String.class, int.class, boolean.class, boolean.class};
