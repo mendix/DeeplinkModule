@@ -135,7 +135,7 @@ public class ResponseHandler {
 
 			if (continuationURL != null && continuationURL.length() > 0) {
 				loginLocation += URLEncoder.encode(continuationURL, java.nio.charset.StandardCharsets.UTF_8.toString());
-			}	
+			}
 		}
 
 		if (!loginLocation.startsWith("http")) {
