@@ -25,7 +25,7 @@ public class ResponseHandler {
 		response.setStatus(IMxRuntimeResponse.NOT_FOUND);
 	}
 
-	public static void serveIndex(IMxRuntimeResponse response, String indexpage) {
+	public static void serveIndex(IMxRuntimeRequest request, IMxRuntimeResponse response, String indexpage) {
 		response.setStatus(IMxRuntimeResponse.SEE_OTHER);
 
 		String location = null;
@@ -38,9 +38,7 @@ public class ResponseHandler {
 			location = INDEXPAGE;
 		}
 
-		if (!location.startsWith("/")) {
-			location = "/" + location;
-		}
+		location = getRootUrl(request) + ensureStartingSlash(location);
 
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Redirecting to index location: " + location);
@@ -79,6 +77,8 @@ public class ResponseHandler {
 				redirectLocation += URLEncoder.encode(pathinfo + querystring,
 						java.nio.charset.StandardCharsets.UTF_8.toString());
 			}
+
+			redirectLocation = getRootUrl(request) + ensureStartingSlash(redirectLocation);
 
 			response.setStatus(IMxRuntimeResponse.SEE_OTHER);
 			response.addHeader("location", redirectLocation);
@@ -139,12 +139,11 @@ public class ResponseHandler {
 		}
 
 		if (!loginLocation.startsWith("http")) {
-			loginLocation = ensureStartingSlash(loginLocation);
+			loginLocation = getRootUrl(request) + ensureStartingSlash(loginLocation);
 		}
 
 		response.setStatus(IMxRuntimeResponse.SEE_OTHER);
 		response.addHeader("location", loginLocation);
-
 	}
 
 	private static String ensureStartingSlash(String s) {
@@ -167,6 +166,15 @@ public class ResponseHandler {
 			s = s.substring(1);
 		}
 		return s;
+	}
+
+	private static String getRootUrl(IMxRuntimeRequest request)
+	{
+		String url = request.getRootUrl();
+		String path = ensureStartingSlash(java.net.URI.create(url).getPath());
+		if(path.endsWith("/"))
+			return path.substring(0, path.length() - 1);
+		return path;
 	}
 
 }

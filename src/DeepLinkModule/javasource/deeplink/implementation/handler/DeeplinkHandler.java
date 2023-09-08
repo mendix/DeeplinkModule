@@ -100,7 +100,7 @@ public class DeeplinkHandler extends RequestHandler {
 							ResponseHandler.serve404(response);
 						}
 						else {
-							ResponseHandler.serveIndex(response, deepLinkConfigurationObject.getIndexPage());
+							ResponseHandler.serveIndex(request, response, deepLinkConfigurationObject.getIndexPage());
 						}
 					}
 				}
