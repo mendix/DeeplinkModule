@@ -63,7 +63,7 @@ public class DeeplinkHandler extends RequestHandler {
 				session = sessionFromRequest;
 			}
 
-			sessionContext = session.createContext();
+			sessionContext = session.createContext().createSudoClone();
 			
 			if(deepLinkRequest.getDeeplinkName().length()==0) {
 				ResponseHandler.serve404(response);
