@@ -44,6 +44,7 @@ public class DeeplinkHandler extends RequestHandler {
 		final DeeplinkRequest deepLinkRequest = new DeeplinkRequest(request);
 
 		ISession session = null;
+		IContext sessionContext = null;
 		IContext systemContext = Core.createSystemContext();
 		
 		ISession sessionFromRequest = this.getSessionFromRequest(request);
@@ -62,6 +63,8 @@ public class DeeplinkHandler extends RequestHandler {
 				session = sessionFromRequest;
 			}
 			
+			sessionContext = session.createContext();
+			
 			if(deepLinkRequest.getDeeplinkName().length()==0) {
 				ResponseHandler.serve404(response);
 			}
@@ -74,8 +77,6 @@ public class DeeplinkHandler extends RequestHandler {
 					if(LOG.isTraceEnabled()) {
 						LOG.trace(String.format("Handling deeplink with existing session(%s)", session.getId()));
 					}
-					
-					sessionContext = session.createContext().createSudoClone();
 
 					/* anonymous users are not immediately forwarded to index when
 						- deeplink does not allow anonymous users
@@ -93,7 +94,7 @@ public class DeeplinkHandler extends RequestHandler {
 					}
 					else {
 		
-						PendingLink preparedPendingLink = preparePendingLink(sessionContext, session, deepLinkConfigurationObject, deepLinkRequest);
+						PendingLink preparedPendingLink = preparePendingLink(systemContext, session, deepLinkConfigurationObject, deepLinkRequest);
 		
 						if(preparedPendingLink == null) {
 							ResponseHandler.serve404(response);
