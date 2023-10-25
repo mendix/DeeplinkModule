@@ -122,10 +122,10 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 				Core.delete(this.getContext(), this.pendinglink.getMendixObject());
 			}
 
-			if (link.getTrackHitCount()) {
+			IContext sudoContext = getContext().createSudoClone();
+			if (link.getTrackHitCount(sudoContext)) {
 				//set hitcount (note, this might not be exact)
-				IContext sudoContext = getContext().createSudoClone();
-				link.setHitCount(sudoContext, link.getHitCount(getContext().createSudoClone()) + 1);
+				link.setHitCount(sudoContext, link.getHitCount(sudoContext) + 1);
 				Core.commit(sudoContext, link.getMendixObject());
 			}
 
