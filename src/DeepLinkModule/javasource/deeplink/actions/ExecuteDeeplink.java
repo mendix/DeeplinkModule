@@ -112,10 +112,11 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 				LOG.error("Failed to execute deeplink " + link.getName(), e);
 				return false;
 			}
+			
+			IContext sudoContext = getContext().createSudoClone();
 
 			//remove the pendinglink, unless it should be reused during this session..
 			if (link.getUseAsHome()) { //do not remove if used as home.
-				IContext sudoContext = getContext().createSudoClone();
 				this.pendinglink.setSessionId(sudoContext, this.getContext().getSession().getId().toString());
 				Core.commit(sudoContext, this.pendinglink.getMendixObject());
 			}
@@ -123,7 +124,6 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 				Core.delete(this.getContext(), this.pendinglink.getMendixObject());
 			}
 
-			IContext sudoContext = getContext().createSudoClone();
 			if(link.getTrackHitCount(sudoContext)) {
 				//set hitcount (note, this might not be exact)
 				link.setHitCount(sudoContext, link.getHitCount(sudoContext) + 1);
