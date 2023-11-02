@@ -94,7 +94,7 @@ public class DeeplinkHandler extends RequestHandler {
 					}
 					else {
 		
-						PendingLink preparedPendingLink = preparePendingLink(systemContext, session, deepLinkConfigurationObject, deepLinkRequest);
+						PendingLink preparedPendingLink = preparePendingLink(sessionContext.createSudoClone(), session, deepLinkConfigurationObject, deepLinkRequest);
 		
 						if(preparedPendingLink == null) {
 							ResponseHandler.serve404(response);
