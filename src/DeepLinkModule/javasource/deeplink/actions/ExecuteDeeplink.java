@@ -111,17 +111,18 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 				return false;
 			}
 
+			IContext sudoContext = getContext().createSudoClone();
+
 			//remove the pendinglink, unless it should be reused during this session..
 			if (link.getUseAsHome()) { //do not remove if used as home.
-				this.pendinglink.setSessionId(this.getContext().getSession().getId().toString());
-				Core.commit(this.getContext(), this.pendinglink.getMendixObject());
+				this.pendinglink.setSessionId(sudoContext, this.getContext().getSession().getId().toString());
+				Core.commit(sudoContext, this.pendinglink.getMendixObject());
 			}
 			else {
 				Core.delete(this.getContext(), this.pendinglink.getMendixObject());
 			}
 
 			//set hitcount (note, this might not be exact)
-			IContext sudoContext = getContext().createSudoClone();
 			link.setHitCount(sudoContext, link.getHitCount(getContext().createSudoClone()) + 1);
 			Core.commit(sudoContext, link.getMendixObject());
 
