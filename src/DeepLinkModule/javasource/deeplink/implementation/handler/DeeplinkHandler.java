@@ -62,7 +62,7 @@ public class DeeplinkHandler extends RequestHandler {
 			else {
 				session = sessionFromRequest;
 			}
-			
+
 			sessionContext = session.createContext();
 			
 			if(deepLinkRequest.getDeeplinkName().length()==0) {
@@ -77,7 +77,7 @@ public class DeeplinkHandler extends RequestHandler {
 					if(LOG.isTraceEnabled()) {
 						LOG.trace(String.format("Handling deeplink with existing session(%s)", session.getId()));
 					}
-
+					
 					/* anonymous users are not immediately forwarded to index when
 						- deeplink does not allow anonymous users
 						- deeplink configuration has a SSO handler configured
