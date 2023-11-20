@@ -2,7 +2,7 @@ name: sigrid-publish
 on:
   push:
     branches:
-      - "main"
+      - "master"
 
 jobs:
   sigridci:
