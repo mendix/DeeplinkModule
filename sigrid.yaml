@@ -17,14 +17,3 @@ component_base_dirs:
   - "src/DeepLinkModule"
 thirdpartyfindings:
   enabled: true
-  exclude:
-    - ".*/src/DeepLinkModule/javascriptsource/datawidgets/.*"
-    - ".*/src/DeepLinkModule/javasource/mendixsso/.*"
-    - ".*/src/DeepLinkModule/javasource/test/.*"
-    - ".*/src/DeepLinkModule/userlib/.*"
-    - ".*/src/DeepLinkModule/theme/.*"
-    - ".*/src/DeepLinkModule/theme_atlas2/.*"
-    - ".*/src/DeepLinkModule/theme-cache/.*"
-    - ".*/src/DeepLinkModule/themesource/.*"
-    - ".*/src/DeepLinkModule/widgets/.*"
-    - ".*/src/DeepLinkModule/resources/.*"
