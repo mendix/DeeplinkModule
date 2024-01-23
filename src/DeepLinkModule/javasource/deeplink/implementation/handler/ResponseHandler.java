@@ -171,7 +171,9 @@ public class ResponseHandler {
 	private static String getRootUrl(IMxRuntimeRequest request)
 	{
 		String url = request.getRootUrl();
-		String path = ensureStartingSlash(java.net.URI.create(url).getPath());
+		//When the root URL does not contain a schema, add it anyways
+		String completeUrl = url.contains("://") ? url : "https://" + url;
+		String path = ensureStartingSlash(java.net.URI.create(completeUrl).getPath());
 		if(path.endsWith("/"))
 			return path.substring(0, path.length() - 1);
 		return path;
