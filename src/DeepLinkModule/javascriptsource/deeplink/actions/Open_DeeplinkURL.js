@@ -5,6 +5,7 @@
 // - the code between BEGIN USER CODE and END USER CODE
 // - the code between BEGIN EXTRA CODE and END EXTRA CODE
 // Other code you write will be lost the next time you deploy the project.
+import "mx-global";
 import { Big } from "big.js";
 
 // BEGIN EXTRA CODE
@@ -16,6 +17,10 @@ import { Big } from "big.js";
  */
 export async function Open_DeeplinkURL(deeplinkURL) {
 	// BEGIN USER CODE
-	window.open(deeplinkURL.get('URL'),'_blank');
+	const url = deeplinkURL.get('URL');
+
+	if(url.includes("://")) return window.open(url,'_blank');
+	
+	window.open(window.location.protocol + "//" + url, '_blank')
 	// END USER CODE
 }

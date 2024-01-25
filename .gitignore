@@ -1,5 +1,7 @@
 src/DeepLinkModule/.classpath
 src/DeepLinkModule/.project
+src/DeepLinkModule/.settings
+src/DeepLinkModule/[App Store] Deeplink.mpr.lock
 src/DeepLinkModule/DeepLinkModule.launch
 src/DeepLinkModule/deployment/
 src/DeepLinkModule/javasource/administration/
@@ -7,8 +9,9 @@ src/DeepLinkModule/javasource/com/mendix/core/Core.java
 src/DeepLinkModule/javasource/deeplink/proxies/
 src/DeepLinkModule/javasource/system/
 src/DeepLinkModule/javasource/test/proxies/
-src/DeepLinkModule/[App Store] Deeplink.mpr.lock
-src/DeepLinkModule/.settings
+src/DeepLinkModule/project-settings.user.json
+src/DeepLinkModule/theme-cache/web/theme.compiled.css
+src/DeepLinkModule/theme-cache/web/theme.compiled.css.map
 *.lock
 .DS_Store
 bin
