@@ -35,7 +35,8 @@ public class DeeplinkHandler extends RequestHandler {
          * a 200 OK tells word the end of the redirect is reached, and it will happily open the 
          * original URL in your default browser... 
          */
-        if (request.getHeader("User-Agent").toLowerCase().contains("office")) {
+        String userAgent = request.getHeader("User-Agent");
+        if (userAgent != null && userAgent.toLowerCase().contains("office")) {
             response.setStatus(IMxRuntimeResponse.OK);
             return;
         }
