@@ -117,7 +117,7 @@ public class ExecuteDeeplink extends CustomJavaAction<java.lang.Boolean>
 			
 			//remove the pendinglink, unless it should be reused during this session..
 			if (link.getUseAsHome()) { //do not remove if used as home.
-				this.pendinglink.setSessionId(sudoContext, sudoContext.getSession().getId().toString());
+				this.pendinglink.setSessionId(sudoContext, this.getContext().getSession().getId().toString());
 				Core.commit(sudoContext, this.pendinglink.getMendixObject());
 			}
 			else {
