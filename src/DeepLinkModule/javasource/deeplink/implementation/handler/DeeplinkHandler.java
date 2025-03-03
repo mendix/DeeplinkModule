@@ -11,9 +11,12 @@ import com.mendix.m2ee.api.IMxRuntimeResponse;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 import com.mendix.systemwideinterfaces.core.ISession;
+import com.mendix.systemwideinterfaces.core.IUser;
 
 import deeplink.proxies.DeepLink;
 import deeplink.proxies.PendingLink;
+import system.proxies.Language;
+import system.proxies.User;
 import deeplink.implementation.handler.helpers.DeeplinkRequest;
 
 public class DeeplinkHandler extends RequestHandler {
@@ -79,11 +82,22 @@ public class DeeplinkHandler extends RequestHandler {
 						LOG.trace(String.format("Handling deeplink with existing session(%s)", session.getId()));
 					}
 					
+					IUser sessionUserObj = session.getUser(sessionContext);
+
+					// Retrieve the language set for the deeplink.
+					Language language = deepLinkConfigurationObject.getDeepLink_Language();
+					if(language != null) {
+						// Deeplink has a language, put it on the session user.
+						User user = User.initialize(sessionContext, sessionUserObj.getMendixObject());
+						user.setUser_Language(language);
+						user.commit();
+					}
+
 					/* anonymous users are not immediately forwarded to index when
 						- deeplink does not allow anonymous users
 						- deeplink configuration has a SSO handler configured
 					*/
-					if(session.getUser(sessionContext).isAnonymous() && 
+					if(sessionUserObj.isAnonymous() && 
 							((DeeplinkHandler.SSOHandler != null && request.getParameter("sso_callback")== null ) || !deepLinkConfigurationObject.getAllowGuests())) {
 						
 						if(!deepLinkConfigurationObject.getAllowGuests()) {
